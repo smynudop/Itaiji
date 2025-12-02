@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+    <RootNamespace>Kanji.Test</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared.Test\MSTestSettings.cs" Link="MSTestSettings.cs" />
+    <Compile Include="..\Shared.Test\Test1.cs" Link="Test1.cs" />
+    <Compile Include="..\Shared.Test\Test2.cs" Link="Test2.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MSTest" Version="4.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Itaiji\Itaiji.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+	<!-- netstandard2.0 のときだけコンパイル -->
+	<ItemGroup Condition="'$(TargetFramework)' != 'net4.8'">
+		<Compile Remove="netStandard/**/*.cs" />
+		<None Include="netStandard/**/*.cs" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net4.8</TargetFrameworks>
+    <Nullable>enable</Nullable>
+	<LangVersion>14</LangVersion>
+	 
+	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+	
+	<ItemGroup>
+	  <Compile Include="..\Shared\EnumExtension.cs" Link="EnumExtension.cs" />
+	  <Compile Include="..\Shared\globalUsing.cs" Link="globalUsing.cs" />
+	  <Compile Include="..\Shared\IvsType.cs" Link="IvsType.cs" />
+	  <Compile Include="..\Shared\Kanji.cs" Link="Kanji.cs" />
+	  <Compile Include="..\Shared\KanjiEnumerator.cs" Link="KanjiEnumerator.cs" />
+	  <Compile Include="..\Shared\Library.cs" Link="Library.cs" />
+	  <Compile Include="..\Shared\RuneExtension.cs" Link="RuneExtension.cs" />
+	  <Compile Include="..\Shared\StringExtension.cs" Link="StringExtension.cs" />
+	</ItemGroup>
+
+</Project>

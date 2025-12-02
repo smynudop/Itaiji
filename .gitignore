@@ -1,0 +1,7 @@
+.vs/
+bin/
+obj/
+TestResults/
+
+*.suo
+IVD_Sequences.txt
