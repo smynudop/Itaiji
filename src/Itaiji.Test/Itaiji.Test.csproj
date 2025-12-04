@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net10.0</TargetFrameworks>
-    <RootNamespace>Kanji.Test</RootNamespace>
+    <RootNamespace>Itaiji.Test</RootNamespace>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -11,7 +11,6 @@
   <ItemGroup>
     <Compile Include="..\Shared.Test\MSTestSettings.cs" Link="MSTestSettings.cs" />
     <Compile Include="..\Shared.Test\Test1.cs" Link="Test1.cs" />
-    <Compile Include="..\Shared.Test\Test2.cs" Link="Test2.cs" />
   </ItemGroup>
 
   <ItemGroup>

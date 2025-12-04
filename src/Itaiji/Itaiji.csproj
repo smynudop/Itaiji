@@ -7,6 +7,12 @@
 	 
 	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
+	
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+			<_Parameter1>Itaiji.Test</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
 
 	<!-- netstandard2.0 のときだけコンパイル -->
 	<ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
@@ -33,6 +39,7 @@
 	  <Compile Include="..\Shared\KanjiEnumerator.cs" Link="KanjiEnumerator.cs" />
 	  <Compile Include="..\Shared\Library.cs" Link="Library.cs" />
 	  <Compile Include="..\Shared\RuneExtension.cs" Link="RuneExtension.cs" />
+	  <Compile Include="..\Shared\SpanKanjiEnumerator.cs" Link="SpanKanjiEnumerator.cs" />
 	  <Compile Include="..\Shared\StringExtension.cs" Link="StringExtension.cs" />
 	</ItemGroup>
 

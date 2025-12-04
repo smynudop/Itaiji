@@ -54,7 +54,9 @@ namespace Itaiji.Text
         /// <summary>
         /// Decomposes an astral Unicode scalar into UTF-16 high and low surrogate code units.
         /// </summary>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static void GetUtf16SurrogatesFromSupplementaryPlaneScalar(uint value, out char highSurrogateCodePoint, out char lowSurrogateCodePoint)
         {
             UnicodeDebug.AssertIsValidSupplementaryPlaneScalar(value);
@@ -116,56 +118,72 @@ namespace Itaiji.Text
         /// <remarks>
         /// Per http://www.unicode.org/glossary/#ASCII, ASCII is only U+0000..U+007F.
         /// </remarks>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static bool IsAsciiCodePoint(uint value) => value <= 0x7Fu;
 
         /// <summary>
         /// Returns <see langword="true"/> iff <paramref name="value"/> is in the
         /// Basic Multilingual Plane (BMP).
         /// </summary>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static bool IsBmpCodePoint(uint value) => value <= 0xFFFFu;
 
         /// <summary>
         /// Returns <see langword="true"/> iff <paramref name="value"/> is a UTF-16 high surrogate code point,
         /// i.e., is in [ U+D800..U+DBFF ], inclusive.
         /// </summary>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static bool IsHighSurrogateCodePoint(uint value) => IsInRangeInclusive(value, 0xD800U, 0xDBFFU);
 
         /// <summary>
         /// Returns <see langword="true"/> iff <paramref name="value"/> is between
         /// <paramref name="lowerBound"/> and <paramref name="upperBound"/>, inclusive.
         /// </summary>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static bool IsInRangeInclusive(uint value, uint lowerBound, uint upperBound) => (value - lowerBound) <= (upperBound - lowerBound);
 
         /// <summary>
         /// Returns <see langword="true"/> iff <paramref name="value"/> is a UTF-16 low surrogate code point,
         /// i.e., is in [ U+DC00..U+DFFF ], inclusive.
         /// </summary>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static bool IsLowSurrogateCodePoint(uint value) => IsInRangeInclusive(value, 0xDC00U, 0xDFFFU);
 
         /// <summary>
         /// Returns <see langword="true"/> iff <paramref name="value"/> is a UTF-16 surrogate code point,
         /// i.e., is in [ U+D800..U+DFFF ], inclusive.
         /// </summary>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static bool IsSurrogateCodePoint(uint value) => IsInRangeInclusive(value, 0xD800U, 0xDFFFU);
 
         /// <summary>
         /// Returns <see langword="true"/> iff <paramref name="codePoint"/> is a valid Unicode code
         /// point, i.e., is in [ U+0000..U+10FFFF ], inclusive.
         /// </summary>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static bool IsValidCodePoint(uint codePoint) => codePoint <= 0x10FFFFU;
 
         /// <summary>
         /// Returns <see langword="true"/> iff <paramref name="value"/> is a valid Unicode scalar
         /// value, i.e., is in [ U+0000..U+D7FF ], inclusive; or [ U+E000..U+10FFFF ], inclusive.
         /// </summary>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static bool IsValidUnicodeScalar(uint value)
         {
             // This is an optimized check that on x86 is just three instructions: lea, xor, cmp.

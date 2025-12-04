@@ -1,12 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Itaiji.NetFramework;
+using Itaiji.Text.Unicode;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using Itaiji.Text.Unicode;
-using Itaiji.NetFramework;
 
 #pragma warning disable CS1591 // 
 
@@ -154,11 +153,10 @@ namespace Itaiji.Text
         private string DebuggerDisplay =>
 #if SYSTEM_PRIVATE_CORELIB
             string.Create(
-                CultureInfo.InvariantCulture,
+                CultureInfo.InvariantCulture,$"U+{_value:X4} '{(IsValid(_value) ? ToString() : "\uFFFD")}'");
 #else
-            FormattableString.Invariant(
+            $"U+{_value:X4} '{(IsValid(_value) ? ToString() : "\uFFFD")}'";
 #endif
-                $"U+{_value:X4} '{(IsValid(_value) ? ToString() : "\uFFFD")}'");
 
         /// <summary>
         /// Returns true if and only if this scalar value is ASCII ([ U+0000..U+007F ])
@@ -339,7 +337,7 @@ namespace Itaiji.Text
             {
                 // First, check for the common case of a BMP scalar value.
                 // If this is correct, return immediately.
-                    
+
                 char firstChar = source[0];
                 if (TryCreate(firstChar, out result))
                 {
@@ -773,6 +771,25 @@ namespace Itaiji.Text
         }
 
         /// <summary>
+        /// Encodes this <see cref="Rune"/> to a UTF-16 destination buffer.
+        /// </summary>
+        /// <param name="destination">The buffer to which to write this value as UTF-16.</param>
+        /// <param name="startIndex">The index in <paramref name="destination"/> at which to begin writing.</param>
+        /// <returns>The number of <see cref="char"/>s written to <paramref name="destination"/>.</returns>
+        /// <exception cref="ArgumentException">
+        /// If <paramref name="destination"/> is not large enough to hold the output.
+        /// </exception>
+        public int EncodeToUtf16(char[] destination, int startIndex)
+        {
+            if (!TryEncodeToUtf16(destination, startIndex, out int charsWritten))
+            {
+                ThrowHelper.ThrowArgumentException_DestinationTooShort();
+            }
+
+            return charsWritten;
+        }
+
+        /// <summary>
         /// Encodes this <see cref="Rune"/> to a UTF-8 destination buffer.
         /// </summary>
         /// <param name="destination">The buffer to which to write this value as UTF-8.</param>
@@ -790,7 +807,7 @@ namespace Itaiji.Text
             return bytesWritten;
         }
 
-        public override bool Equals( object? obj) => (obj is Rune other) && Equals(other);
+        public override bool Equals(object? obj) => (obj is Rune other) && Equals(other);
 
         public bool Equals(Rune other) => this == other;
 
@@ -808,7 +825,7 @@ namespace Itaiji.Text
             }
 
             //TODO: ‘¬“xŒüã‚Å‚«‚éH
-            return this.ToString() .Equals(other.ToString(), comparisonType);
+            return this.ToString().Equals(other.ToString(), comparisonType);
         }
 
         public override int GetHashCode() => Value;
@@ -892,7 +909,7 @@ namespace Itaiji.Text
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.input);
             }
 
-            if ((uint)index >= (uint)input.Length)
+            if ((uint)index >= (uint)input!.Length)
             {
                 ThrowHelper.ThrowArgumentOutOfRange_IndexMustBeLessException();
             }
@@ -1080,27 +1097,52 @@ namespace Itaiji.Text
         /// The <see cref="Utf16SequenceLength"/> property can be queried ahead of time to determine
         /// the required size of the <paramref name="destination"/> buffer.
         /// </remarks>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public bool TryEncodeToUtf16(char[] destination, out int charsWritten)
         {
             // The Rune type fits cleanly into a register, so pass byval rather than byref
             // to avoid stack-spilling the 'this' parameter.
-            return TryEncodeToUtf16(this, destination, out charsWritten);
+            return TryEncodeToUtf16(this, destination, 0, out charsWritten);
         }
 
-        private static bool TryEncodeToUtf16(Rune value, char[] destination, out int charsWritten)
+        /// <summary>
+        /// Encodes this <see cref="Rune"/> to a UTF-16 destination buffer.
+        /// </summary>
+        /// <param name="destination">The buffer to which to write this value as UTF-16.</param>
+        /// <param name="startIndex">The index in <paramref name="destination"/> at which to begin writing.</param>
+        /// <param name="charsWritten">
+        /// The number of <see cref="char"/>s written to <paramref name="destination"/>,
+        /// or 0 if the destination buffer is not large enough to contain the output.</param>
+        /// <returns>True if the value was written to the buffer; otherwise, false.</returns>
+        /// <remarks>
+        /// The <see cref="Utf16SequenceLength"/> property can be queried ahead of time to determine
+        /// the required size of the <paramref name="destination"/> buffer.
+        /// </remarks>
+#if NET45_OR_GREATER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public bool TryEncodeToUtf16(char[] destination, int startIndex, out int charsWritten)
         {
-            if (destination.Length != 0)
+            // The Rune type fits cleanly into a register, so pass byval rather than byref
+            // to avoid stack-spilling the 'this' parameter.
+            return TryEncodeToUtf16(this, destination, startIndex, out charsWritten);
+        }
+
+        private static bool TryEncodeToUtf16(Rune value, char[] destination, int startIndex, out int charsWritten)
+        {
+            if (startIndex < destination.Length)
             {
                 if (value.IsBmp)
                 {
-                    destination[0] = (char)value._value;
+                    destination[startIndex] = (char)value._value;
                     charsWritten = 1;
                     return true;
                 }
                 else if (destination.Length > 1)
                 {
-                    UnicodeUtility.GetUtf16SurrogatesFromSupplementaryPlaneScalar((uint)value._value, out destination[0], out destination[1]);
+                    UnicodeUtility.GetUtf16SurrogatesFromSupplementaryPlaneScalar((uint)value._value, out destination[startIndex], out destination[startIndex + 1]);
                     charsWritten = 2;
                     return true;
                 }
@@ -1124,7 +1166,9 @@ namespace Itaiji.Text
         /// The <see cref="Utf8SequenceLength"/> property can be queried ahead of time to determine
         /// the required size of the <paramref name="destination"/> buffer.
         /// </remarks>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public bool TryEncodeToUtf8(byte[] destination, out int bytesWritten)
         {
             // The Rune type fits cleanly into a register, so pass byval rather than byref
@@ -1230,7 +1274,9 @@ namespace Itaiji.Text
         /// <summary>
         /// Creates a <see cref="Rune"/> without performing validation on the input.
         /// </summary>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         internal static Rune UnsafeCreate(uint scalarValue) => new Rune(scalarValue, false);
 
         // These are analogs of APIs on System.Char
@@ -1458,7 +1504,7 @@ namespace Itaiji.Text
 
             return ChangeCaseCultureAware(value, culture.TextInfo, toUpper: false);
 #else
-            return ChangeCaseCultureAware(value, culture, toUpper: false);
+            return ChangeCaseCultureAware(value, culture!, toUpper: false);
 #endif
         }
 
@@ -1507,7 +1553,7 @@ namespace Itaiji.Text
 
             return ChangeCaseCultureAware(value, culture.TextInfo, toUpper: true);
 #else
-            return ChangeCaseCultureAware(value, culture, toUpper: true);
+            return ChangeCaseCultureAware(value, culture!, toUpper: true);
 #endif
         }
 

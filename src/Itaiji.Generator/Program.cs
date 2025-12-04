@@ -5,15 +5,15 @@ Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 var text = File.ReadAllText("IVD_Sequences.txt");
 
-var dic = new Dictionary<(Rune, Rune), IvsType>(); 
+var dic = new Dictionary<(Rune, Rune), IvsType>();
 foreach (var line in text.Split(["\n"], StringSplitOptions.None))
 {
     if (line.StartsWith("#"))
     {
-        continue; 
+        continue;
     }
 
-    if(line.Trim() == "")
+    if (line.Trim() == "")
     {
         continue;
     }
@@ -33,13 +33,13 @@ foreach (var line in text.Split(["\n"], StringSplitOptions.None))
         "Moji_Joho" => IvsType.MojiJoho,
         _ => IvsType.Other
     };
-    if(type == IvsType.Other)
+    if (type == IvsType.Other)
     {
         Console.WriteLine(cols[1]);
         continue;
     }
 
-    if(dic.ContainsKey(t) == false)
+    if (dic.ContainsKey(t) == false)
     {
         dic[t] = IvsType.None;
     }
@@ -57,25 +57,25 @@ builder.AppendLine("""
     """);
 
 var cnt = 0;
-foreach(var g in dic.GroupBy(x => x.Key.Item1))
+foreach (var g in dic.GroupBy(x => x.Key.Item1))
 {
     var g1 = g.Select(x => x.Value).Distinct();
-    if(g1.Contains(IvsType.HanyoDenshi) && g1.Contains(IvsType.MojiJoho) && g1.Contains(IvsType.HDandMJ))
+    if (g1.Contains(IvsType.HanyoDenshi) && g1.Contains(IvsType.MojiJoho) && g1.Contains(IvsType.HDandMJ))
     {
         Console.WriteLine($"複数IVS種別: U+{g.Key.Value:X}{g.Key}");
     }
 }
 foreach (var kvp in dic.OrderBy(x => x.Key.Item1).ThenBy(x => x.Key.Item2))
 {
-    if(cnt == 0)
+    if (cnt == 0)
     {
         builder.Append("        ");
     }
     var key = (kvp.Key.Item1.Value << 8) | (kvp.Key.Item2.Value & 0xFF);
     var value = (int)kvp.Value;
     builder.Append($"{{0x{key:X},{value}}},");
-    cnt ++;
-    if(cnt == 10)
+    cnt++;
+    if (cnt == 10)
     {
         builder.AppendLine("");
         cnt = 0;

@@ -14,7 +14,9 @@ namespace Itaiji.Text.Unicode
         /// <summary>
         /// Returns true iff the UInt32 represents two ASCII UTF-16 characters in machine endianness.
         /// </summary>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         internal static bool AllCharsInUInt32AreAscii(uint value)
         {
             return (value & ~0x007F_007Fu) == 0;
@@ -23,7 +25,9 @@ namespace Itaiji.Text.Unicode
         /// <summary>
         /// Returns true iff the UInt64 represents four ASCII UTF-16 characters in machine endianness.
         /// </summary>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         internal static bool AllCharsInUInt64AreAscii(ulong value)
         {
             return (value & ~0x007F_007F_007F_007Ful) == 0;
@@ -37,7 +41,9 @@ namespace Itaiji.Text.Unicode
         /// <remarks>
         /// This is a branchless implementation.
         /// </remarks>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         internal static uint ConvertAllAsciiCharsInUInt32ToLowercase(uint value)
         {
             // ASSUMPTION: Caller has validated that input value is ASCII.
@@ -66,7 +72,9 @@ namespace Itaiji.Text.Unicode
         /// <remarks>
         /// This is a branchless implementation.
         /// </remarks>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         internal static uint ConvertAllAsciiCharsInUInt32ToUppercase(uint value)
         {
             // Intrinsified in mono interpreter
@@ -96,7 +104,9 @@ namespace Itaiji.Text.Unicode
         /// <remarks>
         /// This is a branchless implementation.
         /// </remarks>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         internal static ulong ConvertAllAsciiCharsInUInt64ToUppercase(ulong value)
         {
             // ASSUMPTION: Caller has validated that input value is ASCII.
@@ -125,7 +135,9 @@ namespace Itaiji.Text.Unicode
         /// <remarks>
         /// This is a branchless implementation.
         /// </remarks>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         internal static ulong ConvertAllAsciiCharsInUInt64ToLowercase(ulong value)
         {
             // ASSUMPTION: Caller has validated that input value is ASCII.
@@ -153,7 +165,9 @@ namespace Itaiji.Text.Unicode
         /// <remarks>
         /// This is a branchless implementation.
         /// </remarks>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         internal static bool UInt32ContainsAnyLowercaseAsciiChar(uint value)
         {
             // ASSUMPTION: Caller has validated that input value is ASCII.
@@ -178,7 +192,9 @@ namespace Itaiji.Text.Unicode
         /// <remarks>
         /// This is a branchless implementation.
         /// </remarks>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         internal static bool UInt32ContainsAnyUppercaseAsciiChar(uint value)
         {
             // ASSUMPTION: Caller has validated that input value is ASCII.
@@ -203,7 +219,9 @@ namespace Itaiji.Text.Unicode
         /// <remarks>
         /// This is a branchless implementation.
         /// </remarks>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         internal static bool UInt32OrdinalIgnoreCaseAscii(uint valueA, uint valueB)
         {
             // Intrinsified in mono interpreter
@@ -260,7 +278,9 @@ namespace Itaiji.Text.Unicode
         /// <remarks>
         /// This is a branchless implementation.
         /// </remarks>
+#if NET45_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         internal static bool UInt64OrdinalIgnoreCaseAscii(ulong valueA, ulong valueB)
         {
             // Intrinsified in mono interpreter

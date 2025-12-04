@@ -44,10 +44,14 @@ public static class StringExtension
     /// <returns></returns>
     public static bool IsValidAsAdobeJapan(this string str)
     {
-        return str.EnumerateKanji().All(kanji =>
+        foreach (var kanji in str.EnumerateKanji())
         {
-            return kanji.IvsType == IvsType.None || kanji.IvsType.HasBitFlag(IvsType.AdobeJapan);
-        }); 
+            if (kanji.IvsType != IvsType.None && !kanji.IvsType.HasBitFlag(IvsType.AdobeJapan))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
 
@@ -58,10 +62,14 @@ public static class StringExtension
     /// <returns></returns>
     public static bool IsValidAsHanyoDenshi(this string str)
     {
-        return str.EnumerateKanji().All(kanji =>
+        foreach (var kanji in str.EnumerateKanji())
         {
-            return kanji.IvsType == IvsType.None || kanji.IvsType.HasBitFlag(IvsType.HanyoDenshi);
-        });
+            if (kanji.IvsType != IvsType.None && !kanji.IvsType.HasBitFlag(IvsType.HanyoDenshi))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     /// <summary>
@@ -71,10 +79,15 @@ public static class StringExtension
     /// <returns></returns>
     public static bool IsValidAsMojiJoho(this string str)
     {
-        return str.EnumerateKanji().All(kanji =>
+        foreach (var kanji in str.EnumerateKanji())
         {
-            return kanji.IvsType == IvsType.None || kanji.IvsType.HasBitFlag(IvsType.MojiJoho);
-        });
+            if (kanji.IvsType != IvsType.None && !kanji.IvsType.HasBitFlag(IvsType.MojiJoho))
+            {
+                return false;
+            }
+        }
+        return true;
     }
+
 
 }

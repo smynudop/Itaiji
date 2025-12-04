@@ -1,16 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net4.8</TargetFrameworks>
+    <TargetFrameworks>net3.5;net4.0;net4.5;net4.6;net4.7;net4.8</TargetFrameworks>
     <Nullable>enable</Nullable>
 	<LangVersion>14</LangVersion>
 	 
 	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+			<_Parameter1>Itaiji.NetFramework.Test</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
 	
 	<ItemGroup>
 	  <Compile Include="..\Shared\EnumExtension.cs" Link="EnumExtension.cs" />
 	  <Compile Include="..\Shared\globalUsing.cs" Link="globalUsing.cs" />
+	  <Compile Include="..\Shared\ItaijiUtil.cs" Link="ItaijiUtil.cs" />
 	  <Compile Include="..\Shared\IvsType.cs" Link="IvsType.cs" />
 	  <Compile Include="..\Shared\Kanji.cs" Link="Kanji.cs" />
 	  <Compile Include="..\Shared\KanjiEnumerator.cs" Link="KanjiEnumerator.cs" />

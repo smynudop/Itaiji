@@ -1,7 +1,4 @@
-﻿using Microsoft.VisualBasic;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Text;
 #if NETSTANDARD2_0 || NETFRAMEWORK
 using Itaiji.Text;

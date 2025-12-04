@@ -11,5 +11,5 @@ internal static class EnumExtension
     public static bool HasBitFlag(this IvsType value, IvsType flag)
     {
         return (value & flag) == flag;
-    } 
+    }
 }

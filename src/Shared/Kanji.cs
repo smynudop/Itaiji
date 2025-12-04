@@ -10,17 +10,29 @@ namespace Itaiji;
 /// 漢字1文字を表します。
 /// </summary>
 [DebuggerDisplay("{DebuggerString}")]
-public struct KanjiChar : IEquatable<KanjiChar>
+public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
 {
     /// <summary>
     /// ベースの文字
     /// </summary>
-    public readonly Rune BaseRune;
+    public readonly Rune BaseRune => _BaseRune;
+
+    private readonly Rune _BaseRune;
 
     /// <summary>
     /// 異体字セレクター（存在しない場合はnull）。0xE0100〜0xE01EFの範囲。
     /// </summary>
-    public readonly Rune? VariationSelector;
+    public readonly Rune? VariationSelector
+    {
+        get => _VariationSelector.Value != 0 ? _VariationSelector : null;
+    }
+
+    internal readonly Rune NonNullVariationSelector
+    {
+        get => _VariationSelector;
+    }
+
+    private readonly Rune _VariationSelector;
 
     /// <summary>
     /// 異体字の種類を表します
@@ -28,25 +40,85 @@ public struct KanjiChar : IEquatable<KanjiChar>
     public readonly IvsType IvsType;
 
     /// <summary>
+    /// ベースの文字から、異体字セレクターのないKanjiCharを生成します。
+    /// </summary>
+    /// <param name="_base"></param>
+    public KanjiChar(Rune _base) : this(_base, default) { }
+
+    /// <summary>
     /// ベースの文字と異体字セレクターからKanjiCharを生成します。
     /// </summary>
     /// <param name="_base"></param>
     /// <param name="ivs"></param>
-    public KanjiChar(Rune _base, Rune? ivs)
+    public KanjiChar(Rune _base, Rune ivs)
     {
-        this.BaseRune = _base;
-        this.VariationSelector = ivs;
+        if (!ivs.IsIVS() && ivs != default)
+        {
+            throw new ArgumentException("異体字セレクターの範囲外の値です。", nameof(ivs));
+        }
+        this._BaseRune = _base;
+        this._VariationSelector = ivs;
         this.IvsType = JudgeIvsType();
     }
 
     /// <summary>
-    /// ベースの文字から、異体字セレクターのないKanjiCharを生成します。
+    /// ベースとなる文字と異体字セレクターからKanjiCharを生成します。
     /// </summary>
-    /// <param name="_base"></param>
-    public KanjiChar(Rune _base)
+    /// <param name="str"></param>
+    /// <param name="ivs"></param>
+    /// <exception cref="ArgumentException">ベースとなる文字が1文字ではなかった場合、または異体字セレクタが無効だった場合</exception>
+    public KanjiChar(string str, Rune ivs)
     {
-        this.BaseRune = _base;
-        this.VariationSelector = null;
+        if (!ivs.IsIVS() && ivs != default)
+        {
+            throw new ArgumentException("異体字セレクターの範囲外の値です。", nameof(ivs));
+        }
+        var runes = str.EnumerateRunes();
+        if (!runes.MoveNext())
+        {
+            throw new ArgumentException("ベース文字がありません。", nameof(str));
+        }
+        this._BaseRune = runes.Current;
+        if (runes.MoveNext())
+        {
+            throw new ArgumentException("ベース文字が複数あります。", nameof(str));
+        }
+        this._VariationSelector = ivs;
+        this.IvsType = JudgeIvsType();
+    }
+
+    /// <summary>
+    /// ベースとなる文字と異体字セレクターからKanjiCharを生成します。
+    /// </summary>
+    /// <param name="str"></param>
+    /// <exception cref="ArgumentException">ベースとなる文字が表せない場合</exception>
+    public KanjiChar(string str)
+    {
+        var runes = str.EnumerateRunes();
+        if (!runes.MoveNext())
+        {
+            throw new ArgumentException("ベース文字がありません。", nameof(str));
+        }
+        this._BaseRune = runes.Current;
+        if (runes.MoveNext())
+        {
+            if (runes.Current.IsIVS())
+            {
+                this._VariationSelector = runes.Current;
+                if (runes.MoveNext())
+                {
+                    throw new ArgumentException("ベース文字が複数あります。", nameof(str));
+                }
+            }
+            else
+            {
+                throw new ArgumentException("ベース文字が無効です。", nameof(str));
+            }
+        }
+        else
+        {
+            this._VariationSelector = default;
+        }
         this.IvsType = JudgeIvsType();
     }
 
@@ -56,8 +128,8 @@ public struct KanjiChar : IEquatable<KanjiChar>
     /// <param name="_base"></param>
     public KanjiChar(char _base)
     {
-        this.BaseRune = new Rune(_base);
-        this.VariationSelector = null;
+        this._BaseRune = new Rune(_base);
+        this._VariationSelector = default;
         this.IvsType = JudgeIvsType();
     }
 
@@ -66,16 +138,16 @@ public struct KanjiChar : IEquatable<KanjiChar>
     /// </summary>
     /// <param name="_base"></param>
     /// <param name="ivs"></param>
-    public KanjiChar(char _base, byte ivs)
+    internal KanjiChar(char _base, byte ivs)
     {
-        this.BaseRune = new Rune(_base);
-        this.VariationSelector = new Rune(0xE0100 | ivs);
+        this._BaseRune = new Rune(_base);
+        this._VariationSelector = new Rune(0xE0100 | ivs);
         this.IvsType = JudgeIvsType();
     }
 
     private IvsType JudgeIvsType()
     {
-        if (VariationSelector == null)
+        if (_VariationSelector == default)
         {
             return IvsType.None;
         }
@@ -92,30 +164,32 @@ public struct KanjiChar : IEquatable<KanjiChar>
     /// <summary>
     /// この文字が異体字セレクターを持つかどうか
     /// </summary>
-    public readonly bool IsVariation { get => VariationSelector != null; }
+    public readonly bool IsVariation { get => _VariationSelector != default; }
 
     /// <summary>
     /// Utf32におけるシーケンス長を取得
     /// </summary>
     public readonly int Utf32SequenceLength
     {
-        get => VariationSelector.HasValue ? 2 : 1;
+        get => _VariationSelector != default ? 2 : 1;
     }
 
     /// <summary>
     /// Utf16におけるシーケンス長を取得
     /// </summary>
-    public readonly int Utf16SequenceLength { 
-        get => BaseRune.Utf16SequenceLength 
-            + VariationSelector?.Utf16SequenceLength ?? 0; 
+    public readonly int Utf16SequenceLength
+    {
+        get => _BaseRune.Utf16SequenceLength
+            + (_VariationSelector != default ? _VariationSelector.Utf16SequenceLength : 0);
     }
 
     /// <summary>
     /// Utf16におけるシーケンス長を取得
     /// </summary>
-    public readonly int Utf8SequenceLength { 
-        get => BaseRune.Utf8SequenceLength 
-            + VariationSelector?.Utf8SequenceLength ?? 0; 
+    public readonly int Utf8SequenceLength
+    {
+        get => _BaseRune.Utf8SequenceLength
+            + (_VariationSelector != default ? _VariationSelector.Utf8SequenceLength : 0);
     }
 
     /// <summary>
@@ -136,14 +210,14 @@ public struct KanjiChar : IEquatable<KanjiChar>
     /// <inheritdoc/>
     public override readonly bool Equals(object? other)
     {
-        return other is KanjiChar otherKanji ? Equals(otherKanji) : false;
+        return other is KanjiChar otherKanji && Equals(otherKanji);
     }
 
     /// <inheritdoc/>
     public readonly bool Equals(KanjiChar other)
     {
-        return BaseRune == other.BaseRune 
-            && VariationSelector == other.VariationSelector;
+        return _BaseRune == other.BaseRune
+            && _VariationSelector == other.NonNullVariationSelector;
     }
 
     /// <summary>
@@ -169,31 +243,94 @@ public struct KanjiChar : IEquatable<KanjiChar>
         return !left.Equals(right);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="left"></param>
+    /// <param name="right"></param>
+    /// <returns></returns>
+    public static bool operator <(KanjiChar left, KanjiChar right) => left.CompareTo(right) < 0;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="left"></param>
+    /// <param name="right"></param>
+    /// <returns></returns>
+    public static bool operator <=(KanjiChar left, KanjiChar right) => left.CompareTo(right) <= 0;
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="left"></param>
+    /// <param name="right"></param>
+    /// <returns></returns>
+    public static bool operator >(KanjiChar left, KanjiChar right) => left.CompareTo(right) > 0;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="left"></param>
+    /// <param name="right"></param>
+    /// <returns></returns>
+    public static bool operator >=(KanjiChar left, KanjiChar right) => left.CompareTo(right) >= 0;
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    public readonly int CompareTo(KanjiChar other)
+    {
+        var baseCompare = _BaseRune.CompareTo(other.BaseRune);
+        if (baseCompare != 0)
+        {
+            return baseCompare;
+        }
+        return _VariationSelector.CompareTo(other.NonNullVariationSelector);
+    }
+
     /// <inheritdoc/>
     public override readonly int GetHashCode()
     {
-        var hash1 = BaseRune.GetHashCode();
-        var hash2 = VariationSelector?.GetHashCode() ?? 0;
-        return (hash1 << 8) | (hash2 & 0xFF);
+        return (_BaseRune.Value << 8) | (_VariationSelector.Value & 0xFF); // defaultの場合は0なので問題なし
     }
 
     /// <inheritdoc/>
     public override readonly string ToString()
     {
-        return BaseRune.ToString() + VariationSelector?.ToString() ?? "";
+#if NETFRAMEWORK
+        var buffer = new char[4];
+        var len = _BaseRune.EncodeToUtf16(buffer);
+        if (_VariationSelector != default)
+        {
+            len += _VariationSelector.EncodeToUtf16(buffer, len);
+        }
+        return new string(buffer, 0, len);
+#else
+        Span<char> buffer = stackalloc char[4];
+        var len = _BaseRune.EncodeToUtf16(buffer);
+        if (_VariationSelector != default)
+        {
+            len += _VariationSelector.EncodeToUtf16(buffer.Slice(len));
+        }
+        return new string(buffer.Slice(0, len));
+#endif
     }
 
     private readonly string DebuggerString
     {
         get
         {
-            if (VariationSelector is null)
+            if (_VariationSelector == default)
             {
-                return $"{BaseRune} U+{BaseRune.Value:X}";
+                return $"{_BaseRune} U+{_BaseRune.Value:X}";
             }
             else
             {
-                return $"{BaseRune}{VariationSelector} U+{BaseRune.Value:X} U+{VariationSelector.Value.Value:X}";
+                return $"{_BaseRune}{_VariationSelector} U+{_BaseRune.Value:X} U+{_VariationSelector.Value:X}";
             }
         }
     }

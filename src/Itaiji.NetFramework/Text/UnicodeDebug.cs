@@ -69,7 +69,7 @@ namespace Itaiji.Text
         /// </remarks>
         private static string ToHexString(uint codePoint)
         {
-            return FormattableString.Invariant($"U+{codePoint:X4}");
+            return $"U+{codePoint:X4}";
         }
     }
 }

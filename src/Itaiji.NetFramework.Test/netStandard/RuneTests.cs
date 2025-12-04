@@ -2,11 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text.Unicode;
-using Itaiji.Text;
 using Itaiji.NetFramework;
+using Itaiji.Text;
+using System.Globalization;
 
 namespace Kanji.Test
 {
@@ -412,7 +410,7 @@ namespace Kanji.Test
         public void GetRuneAt_TryGetRuneAt_Utf16_BadArgs()
         {
             // null input
-            Assert.Throws<ArgumentNullException>(() => Rune.GetRuneAt(null, 0));
+            Assert.Throws<ArgumentNullException>(() => Rune.GetRuneAt(null!, 0));
 
             // negative index specified
             Assert.Throws<ArgumentOutOfRangeException>(() => Rune.GetRuneAt("hello", -1));

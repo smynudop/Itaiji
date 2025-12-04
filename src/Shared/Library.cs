@@ -2,7 +2,7 @@ namespace Itaiji;
 
 internal class Library
 {
-    public static readonly SortedList<int, int> JpIvsList = new ()
+    public static readonly SortedList<int, int> JpIvsList = new()
     {
         {0x340200,1},{0x340201,1},{0x340202,1},{0x340203,2},{0x340204,2},{0x340400,6},{0x340401,6},{0x340402,4},{0x340500,1},{0x340600,1},
         {0x342700,1},{0x342701,2},{0x342702,2},{0x342A00,2},{0x342A01,6},{0x342A02,2},{0x342A03,4},{0x342C00,1},{0x342C01,6},{0x342C02,6},
