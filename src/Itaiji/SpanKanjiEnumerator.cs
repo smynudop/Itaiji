@@ -68,7 +68,7 @@ public ref struct SpanKanjiEnumerator : IEnumerator<KanjiChar>
             _prev = default;
             return true;
         }
-        if (next.IsIVS() && !_prev.IsIVS())
+        if (next.IsIvs() && !_prev.IsIvs())
         {
             _current = new KanjiChar(_prev, next);
             _prev = default;

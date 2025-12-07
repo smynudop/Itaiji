@@ -214,7 +214,7 @@ public static class ItaijiUtility
         char[] result = new char[str.Length];
         foreach (var rune in str.EnumerateRunes())
         {
-            if (rune.IsIVS())
+            if (rune.IsIvs())
             {
                 continue;
             }
@@ -227,7 +227,7 @@ public static class ItaijiUtility
         Span<char> result = new char[str.Length];
         foreach (var rune in str.AsSpan().EnumerateRunes())
         {
-            if (rune.IsIVS())
+            if (rune.IsIvs())
             {
                 continue;
             }

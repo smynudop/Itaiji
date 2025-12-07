@@ -14,7 +14,7 @@ public static class RuneExtension
     /// </summary>
     /// <param name="rune"></param>
     /// <returns></returns>
-    public static bool IsIVS(this Rune rune)
+    public static bool IsIvs(this Rune rune)
     {
         return 0xE0100 <= rune.Value && rune.Value <= 0xE01EF;
     }

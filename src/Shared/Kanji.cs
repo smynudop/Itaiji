@@ -53,7 +53,7 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
     /// <exception cref="ArgumentException">異体字セレクタが無効だった場合</exception>"
     public KanjiChar(Rune _base, Rune ivs)
     {
-        if (!ivs.IsIVS() && ivs != default)
+        if (!ivs.IsIvs() && ivs != default)
         {
             throw new ArgumentException("異体字セレクターの範囲外の値です。", nameof(ivs));
         }
@@ -69,7 +69,7 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
     /// <exception cref="ArgumentException">ベースとなる文字が1文字ではなかった場合、または異体字セレクタが無効だった場合</exception>
     public KanjiChar(string str, Rune ivs)
     {
-        if (!ivs.IsIVS() && ivs != default)
+        if (!ivs.IsIvs() && ivs != default)
         {
             throw new ArgumentException("異体字セレクターの範囲外の値です。", nameof(ivs));
         }
@@ -101,7 +101,7 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
         this._BaseRune = runes.Current;
         if (runes.MoveNext())
         {
-            if (runes.Current.IsIVS())
+            if (runes.Current.IsIvs())
             {
                 this._VariationSelector = runes.Current;
                 if (runes.MoveNext())
