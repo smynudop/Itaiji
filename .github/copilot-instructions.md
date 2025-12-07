@@ -44,6 +44,15 @@ Itaiji は .NET 向けの異体字処理ライブラリです。
 	- 構造体はreadonlyにし、可能な限りBox化、防衛的コピーを避けます。
 	- Linqは使用しません。foreachは使用しても構いません。
 
+## 命名規則
+- C# の一般的な命名規則に従います。
+- Ideographic Variation Sequence はIvsと省略します。
+	- 異体字セレクタ全般を扱う場合はVariationSelector(Vs)としますが、本ライブラリでは現在IVSのみを扱うため、Ivsとします。
+- 「異体字セレクタを考慮する」メソッドは以下のように命名します。
+	- IvsComparisonをユーザーが指定できる場合 -> メソッド名の末尾にWithIvsを付与
+	- Ivsの違いを考慮する場合 -> メソッド名の末尾にRespectIvsを付与
+	- Ivsの違いを無視する場合 -> メソッド名の末尾にIgnoreIvsを付与
+
 
 # KanjiChar 構造体の設計方針
 - メンバとしてRune2つを持ちます。1つ目が基本字、2つ目がIVSです。

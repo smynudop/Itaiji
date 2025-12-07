@@ -14,9 +14,11 @@ public static class ItaijiUtility
 
     /// <summary>
     /// 異体字セレクタを考慮したときの文字列の長さを取得します。
+    /// このメソッドは厳密な書記素数を返しません。
+    /// 正確な書記素数を取得したい場合は <see cref="System.Globalization.StringInfo"/> を使用してください。
     /// </summary>
-    /// <param name="str"></param>
-    /// <returns></returns>
+    /// <param name="str">対象の文字列</param>
+    /// <returns>異体字セレクタを考慮した文字列の長さ（漢字列としての長さ）を返します。</returns>
     public static int LengthAsKanji(string str)
     {
         var enumerator = new KanjiEnumerator(str);
@@ -39,12 +41,12 @@ public static class ItaijiUtility
     }
 
     /// <summary>
-    /// 異体字を無視して文字列が等しいか調べます。
+    /// 異体字を考慮して文字列が等しいか調べます。
     /// </summary>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <param name="comparison"></param>
-    /// <returns></returns>
+    /// <param name="a">比較対象の文字列（左辺）</param>
+    /// <param name="b">比較対象の文字列（右辺）</param>
+    /// <param name="comparison">異体字の比較方法を指定する列挙値</param>
+    /// <returns>等しい場合はtrue、それ以外はfalseを返します。</returns>
     public static bool Equals(string a, string b, IvsComparison comparison)
     { 
 
@@ -76,34 +78,35 @@ public static class ItaijiUtility
     }
 
     /// <summary>
-    /// 異体字を無視して文字列が等しいか調べます。
+    /// 異体字の違いを無視して文字列が等しいか調べます。
     /// </summary>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <returns></returns>
+    /// <param name="a">比較対象の文字列（左辺）</param>
+    /// <param name="b">比較対象の文字列（右辺）</param>
+    /// <returns>異体字を無視して等しい場合はtrue、それ以外はfalseを返します。</returns>
     public static bool EqualsIgnoreIvs(string a, string b)
     {
         return Equals(a, b, IvsComparison.IgnoreIvs);
     }
 
     /// <summary>
-    /// 異体字を無視して文字列が等しいか調べます。
+    /// 異体字を厳密に考慮して文字列が等しいか調べます。
     /// </summary>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <returns></returns>
+    /// <remarks>このメソッドはstring.Equalsと同じ動作をします。</remarks>
+    /// <param name="a">比較対象の文字列（左辺）</param>
+    /// <param name="b">比較対象の文字列（右辺）</param>
+    /// <returns>異体字も区別して等しい場合はtrue、それ以外はfalseを返します。</returns>
     public static bool EqualsExactMatch(string a, string b)
     {
         return Equals(a, b, IvsComparison.ExactMatch);
     }
 
     /// <summary>
-    /// 異体字を無視して文字列の中にキーワードが含まれているか調べます。
+    /// 異体字を考慮して文字列の中にキーワードが含まれているか調べます。
     /// </summary>
-    /// <param name="str">対象の文字列</param>
-    /// <param name="keyword">調べる文字列</param>
-    /// <param name="comparison">異体字の比較方法</param>   
-    /// <returns>存在する場合は、開始indexと文字列の長さ。存在しない場合は、(-1, 0)</returns>
+    /// <param name="str">検索対象の文字列</param>
+    /// <param name="keyword">検索する部分文字列</param>
+    /// <param name="comparison">異体字の比較方法を指定する列挙値</param>
+    /// <returns>部分文字列が存在する場合はtrue、存在しない場合はfalseを返します。</returns>
     public static bool Contains(string str, string keyword, IvsComparison comparison)
     {
         return TryFindIndex(str, keyword, comparison, out _, out _);
@@ -111,12 +114,12 @@ public static class ItaijiUtility
 
 #if NET47_OR_GREATER || NET5_0_OR_GREATER
     /// <summary>
-    /// 異体字を無視して文字列の中にキーワードが含まれているか調べます。
+    /// 異体字を考慮して文字列の中にキーワードが含まれているか調べ、その開始indexとchar換算でのlengthを返します。
     /// </summary>
-    /// <param name="str"></param>
-    /// <param name="keyword"></param>
-    /// <param name="comparison">異体字の比較方法</param>
-    /// <returns>存在する場合は、開始indexと文字列の長さ。存在しない場合は、(-1, 0)</returns>
+    /// <param name="str">検索対象の文字列</param>
+    /// <param name="keyword">検索する部分文字列</param>
+    /// <param name="comparison">異体字の比較方法を指定する列挙値</param>
+    /// <returns>見つかった場合は開始indexとchar単位のlengthを返します。見つからなければ(-1,0)を返します。</returns>
     public static (int index, int length) FindIndex(string str, string keyword, IvsComparison comparison)
     {
         TryFindIndex(str, keyword, comparison, out var index, out var length);
@@ -125,14 +128,14 @@ public static class ItaijiUtility
 #endif
 
     /// <summary>
-    /// 異体字を無視して文字列の中にキーワードが含まれているか調べます。
+    /// 異体字を考慮して文字列の中にキーワードが含まれているか調べます。
     /// </summary>
-    /// <param name="str"></param>
-    /// <param name="keyword"></param>
-    /// <param name="comparison">異体字の比較方法</param>
-    /// <param name="index">開始index</param>
-    /// <param name="length">文字列の長さ</param>
-    /// <returns>存在する場合は、開始indexと文字列の長さ。存在しない場合は、(-1, 0)</returns>
+    /// <param name="str">検索対象の文字列</param>
+    /// <param name="keyword">検索する部分文字列</param>
+    /// <param name="comparison">異体字の比較方法を指定する列挙値</param>
+    /// <param name="index">見つかった場合に開始indexが格納されます（見つからない場合は-1）</param>
+    /// <param name="length">見つかった場合にchar単位のlengthが格納されます（見つからない場合は0）</param>
+    /// <returns>部分文字列が存在する場合はtrue、存在しない場合はfalseを返します。</returns>
     public static bool TryFindIndex(string str, string keyword, IvsComparison comparison, out int index, out int length)
     {
         Func<KanjiChar, KanjiChar, bool> equalsFunc = GetEqualsFunc(comparison);
@@ -200,10 +203,10 @@ public static class ItaijiUtility
     }
 
     /// <summary>
-    /// 文字列から異体字セレクターをすべて取り除きます。
+    /// 文字列から異体字セレクターを除去します。
     /// </summary>
-    /// <param name="str"></param>
-    /// <returns></returns>
+    /// <param name="str">対象の文字列</param>
+    /// <returns>異体字セレクターを除去した新しい文字列を返します。</returns>
     public static string RemoveIvs(string str)
     {
 #if NETFRAMEWORK
@@ -235,11 +238,11 @@ public static class ItaijiUtility
     }
 
     /// <summary>
-    /// Adobe-Japan1として無効な異体字セレクタを含まないかどうかを判定します。
+    /// 特定のコレクションに対して無効な異体字を含むかどうかを判定します。
     /// </summary>
-    /// <param name="str"></param>
-    /// <param name="targetType"></param>
-    /// <returns></returns>
+    /// <param name="str">調査する文字列</param>
+    /// <param name="targetType">対象となるコレクションの種類</param>
+    /// <returns>指定したコレクションで無効な異体字を含む場合はtrueを返します。</returns>
     public static bool HasInvalidIvs(string str, IvsCollectionType targetType)
     {
         if(targetType == IvsCollectionType.None)
@@ -259,24 +262,24 @@ public static class ItaijiUtility
     }
 
     /// <summary>
-    /// Adobe-Japan1として無効な異体字セレクタを含むかどうかを判定します。
+    /// Adobe-Japan1として無効な異体字を含むかどうかを判定します。
     /// </summary>
-    /// <param name="str"></param>
-    /// <returns></returns>
+    /// <param name="str">調査する文字列</param>
+    /// <returns>Adobe-Japan1として無効な異体字を含む場合はtrueを返します。</returns>
     public static bool HasInvalidIvsAsAdobeJapan1(string str) => HasInvalidIvs(str, IvsCollectionType.AdobeJapan);
 
     /// <summary>
-    /// Adobe-Japan1として無効な異体字セレクタを含まないかどうかを判定します。
+    /// Hanyo-Denshiとして無効な異体字を含むかどうかを判定します。
     /// </summary>
-    /// <param name="str"></param>
-    /// <returns></returns>
+    /// <param name="str">調査する文字列</param>
+    /// <returns>Hanyo-Denshiとして無効な異体字を含む場合はtrueを返します。</returns>
     public static bool HasInvalidIvsAsHanyoDenshi(string str) => HasInvalidIvs(str, IvsCollectionType.HanyoDenshi);
 
     /// <summary>
-    /// Adobe-Japan1として無効な異体字セレクタを含まないかどうかを判定します。
+    /// Moji_Johoとして無効な異体字を含むかどうかを判定します。
     /// </summary>
-    /// <param name="str"></param>
-    /// <returns></returns>
+    /// <param name="str">調査する文字列</param>
+    /// <returns>Moji_Johoとして無効な異体字を含む場合はtrueを返します。</returns>
     public static bool HasInvalidIvsAsMojiJoho(string str) => HasInvalidIvs(str, IvsCollectionType.MojiJoho);
 
 
