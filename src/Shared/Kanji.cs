@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using System.Text;
+using Itaiji.Extensions;
 #if NETSTANDARD2_0 || NETFRAMEWORK
 using Itaiji.Text;
 #endif
@@ -13,15 +13,20 @@ namespace Itaiji;
 public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
 {
     /// <summary>
-    /// ベースの文字
+    /// ベースのRune
     /// </summary>
+    /// <remarks>
+    /// 文字列に異体字セレクタが単独で含まれていた場合や、連続した異体字セレクタが含まれていた場合などは、
+    /// BaseRuneが異体字セレクタとなるケースも存在します。
+    /// </remarks> 
     public readonly Rune BaseRune => _BaseRune;
 
     private readonly Rune _BaseRune;
 
     /// <summary>
-    /// 異体字セレクター（存在しない場合はnull）。0xE0100〜0xE01EFの範囲。
+    /// 異体字セレクター。存在しない場合はnull
     /// </summary>
+    /// <remarks>0xE0100～0xE01EFの範囲</remarks>
     public readonly Rune? VariationSelector
     {
         get => _VariationSelector.Value != 0 ? _VariationSelector : null;
@@ -35,21 +40,17 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
     private readonly Rune _VariationSelector;
 
     /// <summary>
-    /// 異体字の種類を表します
-    /// </summary>
-    public readonly IvsType IvsType;
-
-    /// <summary>
-    /// ベースの文字から、異体字セレクターのないKanjiCharを生成します。
+    /// ベースのRuneから、異体字セレクターのないKanjiCharを生成します。
     /// </summary>
     /// <param name="_base"></param>
     public KanjiChar(Rune _base) : this(_base, default) { }
 
     /// <summary>
-    /// ベースの文字と異体字セレクターからKanjiCharを生成します。
+    /// ベースのRuneと異体字セレクターのRuneからKanjiCharを生成します。
     /// </summary>
     /// <param name="_base"></param>
     /// <param name="ivs"></param>
+    /// <exception cref="ArgumentException">異体字セレクタが無効だった場合</exception>"
     public KanjiChar(Rune _base, Rune ivs)
     {
         if (!ivs.IsIVS() && ivs != default)
@@ -58,7 +59,6 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
         }
         this._BaseRune = _base;
         this._VariationSelector = ivs;
-        this.IvsType = JudgeIvsType();
     }
 
     /// <summary>
@@ -84,7 +84,6 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
             throw new ArgumentException("ベース文字が複数あります。", nameof(str));
         }
         this._VariationSelector = ivs;
-        this.IvsType = JudgeIvsType();
     }
 
     /// <summary>
@@ -119,7 +118,6 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
         {
             this._VariationSelector = default;
         }
-        this.IvsType = JudgeIvsType();
     }
 
     /// <summary>
@@ -130,7 +128,6 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
     {
         this._BaseRune = new Rune(_base);
         this._VariationSelector = default;
-        this.IvsType = JudgeIvsType();
     }
 
     /// <summary>
@@ -142,41 +139,46 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
     {
         this._BaseRune = new Rune(_base);
         this._VariationSelector = new Rune(0xE0100 | ivs);
-        this.IvsType = JudgeIvsType();
     }
 
-    private IvsType JudgeIvsType()
+    /// <summary>
+    /// 異体字セレクタが属するIVSコレクションの種類を取得します。
+    /// ライブラリが対応していない異体字の場合は<see cref="IvsCollectionType.Unknown"/>を返します。
+    /// </summary>
+    public IvsCollectionType GetIvsCollectionType()
     {
         if (_VariationSelector == default)
         {
-            return IvsType.None;
+            return IvsCollectionType.None;
         }
         else if (Library.JpIvsList.TryGetValue(this.GetHashCode(), out var type))
         {
-            return (IvsType)type;
+            return (IvsCollectionType)type;
         }
         else
         {
-            return IvsType.Unknown;
+            return IvsCollectionType.Unknown;
         }
     }
 
     /// <summary>
-    /// この文字が異体字セレクターを持つかどうか
+    /// この文字が異体字セレクターを持つかどうかを取得します。
     /// </summary>
     public readonly bool IsVariation { get => _VariationSelector != default; }
 
     /// <summary>
-    /// Utf32におけるシーケンス長を取得
+    /// Utf32におけるシーケンス長を取得します。
     /// </summary>
+    /// <remarks>デフォルト(U+0000)の場合、値は1となります。</remarks>
     public readonly int Utf32SequenceLength
     {
         get => _VariationSelector != default ? 2 : 1;
     }
 
     /// <summary>
-    /// Utf16におけるシーケンス長を取得
+    /// Utf16におけるシーケンス長を取得します。char換算の長さと等価です。
     /// </summary>
+    /// <remarks>デフォルト(U+0000)の場合、値は1となります。</remarks>
     public readonly int Utf16SequenceLength
     {
         get => _BaseRune.Utf16SequenceLength
@@ -184,28 +186,14 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
     }
 
     /// <summary>
-    /// Utf16におけるシーケンス長を取得
+    /// Utf8におけるシーケンス長を取得します。
     /// </summary>
+    /// <remarks>デフォルト(U+0000)の場合、値は1となります。</remarks>
     public readonly int Utf8SequenceLength
     {
         get => _BaseRune.Utf8SequenceLength
             + (_VariationSelector != default ? _VariationSelector.Utf8SequenceLength : 0);
     }
-
-    /// <summary>
-    /// Adobe-Japan1として有効な異体字セレクタを持つかどうか
-    /// </summary>
-    public readonly bool IsAdobeJapan => IvsType.HasBitFlag(IvsType.AdobeJapan);
-
-    /// <summary>
-    /// Hanyo-Denshiとして有効な異体字セレクタを持つかどうか
-    /// </summary>
-    public readonly bool IsHanyoDenshi => IvsType.HasBitFlag(IvsType.HanyoDenshi);
-
-    /// <summary>
-    /// Moji-Johoとして有効な異体字セレクタを持つかどうか
-    /// </summary>
-    public readonly bool IsMojiJoho => IvsType.HasBitFlag(IvsType.MojiJoho);
 
     /// <inheritdoc/>
     public override readonly bool Equals(object? other)

@@ -1,4 +1,4 @@
-﻿namespace Itaiji;
+﻿namespace Itaiji.Extensions;
 
 internal static class EnumExtension
 {
@@ -8,7 +8,7 @@ internal static class EnumExtension
     /// <param name="value"></param>
     /// <param name="flag"></param>
     /// <returns></returns>
-    public static bool HasBitFlag(this IvsType value, IvsType flag)
+    public static bool HasBitFlag(this IvsCollectionType value, IvsCollectionType flag)
     {
         return (value & flag) == flag;
     }

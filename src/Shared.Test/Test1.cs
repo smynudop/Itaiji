@@ -1,5 +1,5 @@
 ﻿#nullable disable
-
+using Itaiji.Extensions;
 using System.Text;
 #if NETFRAMEWORK
 using Itaiji.Text;
@@ -227,57 +227,90 @@ public sealed class ItaijiTest
     {
         var strA = data.A().Select(rune => rune.ToString()).Aggregate((a, b) => a + b);
         var strB = data.B().Select(rune => rune.ToString()).Aggregate((a, b) => a + b);
-        Assert.AreEqual(data.Expected, ItaijiUtil.EqualsIgnoreIvs(strA, strB));
+        Assert.AreEqual(data.Expected, ItaijiUtility.EqualsIgnoreIvs(strA, strB));
+    }
+
+    public class FindIndexTestData
+    {
+        public Func<string> Source { get; set; }
+        public Func<string> Target { get; set; }
+        public Func<(int, int)> ExpectedIndexAndLength { get; set; }
+        public bool ExpectContainsExactly { get; set; }
+        public bool ExpectContainsIgnoreIvs { get; set; }
+    }
+
+    public static IEnumerable<object[]> FindIndexTestDataSamples()
+    {
+        yield return new object[]
+        {
+            new FindIndexTestData
+            {
+                Source = () => new string (['私', 'は', '山', '本', '博', 'で', 'す']),
+                Target = () => new string (['山', '本', '博']),
+                ExpectedIndexAndLength = () => (2, 3),
+                ExpectContainsExactly = true,
+                ExpectContainsIgnoreIvs = true
+            }
+        };
+        yield return new object[]
+        {
+            new FindIndexTestData
+            {
+                Source = () => new string (['私', 'は', '山', '本', '博', VS17High, VS17Low, 'で', 'す']),
+                Target = () => new string (['山', '本', '博']),
+                ExpectedIndexAndLength =  () => (2, 5),
+                ExpectContainsExactly = false,
+                ExpectContainsIgnoreIvs = true
+            }
+        };
+        yield return new object[]
+        {
+            new FindIndexTestData
+            {
+                Source = () => new string (['私', 'は', '山', '本', '博', 'で', 'す']),
+                Target = () => new string (['山', '本', '博', VS17High, VS17Low]),
+                ExpectedIndexAndLength =  () => (2, 3),
+                ExpectContainsExactly = false,
+                ExpectContainsIgnoreIvs = true
+            }
+        };
+        yield return new object[]
+        {
+            new FindIndexTestData
+            {
+                Source = () => new string (['私', VS17High, VS17Low, 'は', '山', '本', '博', 'で', 'す']),
+                Target = () => new string (['山', '本', '博']),
+                ExpectedIndexAndLength =  () => (4, 3),
+                ExpectContainsExactly = true,
+                ExpectContainsIgnoreIvs = true
+            }
+        };
+        yield return new object[]
+        {
+            new FindIndexTestData
+            {
+                Source = () => new string (['私', 'は', '山', '本', '博', 'で', 'す']),
+                Target = () => new string (['山', '本', '専']),
+                ExpectedIndexAndLength =  () => (-1, 0),
+                ExpectContainsExactly = false,
+                ExpectContainsIgnoreIvs = false
+            }
+        };
     }
 
     [TestMethod]
-    public void ContainsIgnoreIvsTest()
+    [DynamicData(nameof(FindIndexTestDataSamples))]
+    public void ContainsIgnoreIvsTest(FindIndexTestData data)
     {
-        Assert.IsTrue(ItaijiUtil.ContainsIgnoreIvs(
-            new string(['私', 'は', '山', '本', '博', 'で', 'す']),
-            new string(['山', '本', '博'])
-        ));
-        Assert.IsTrue(ItaijiUtil.ContainsIgnoreIvs(
-            new string(['私', 'は', '山', '本', '博', VS17High, VS17Low, 'で', 'す']),
-            new string(['山', '本', '博'])
-        ));
-        Assert.IsTrue(ItaijiUtil.ContainsIgnoreIvs(
-            new string(['私', 'は', '山', '本', '博', 'で', 'す']),
-            new string(['山', '本', '博', VS17High, VS17Low])
-        ));
-        Assert.IsTrue(ItaijiUtil.ContainsIgnoreIvs(
-            new string(['私', VS17High, VS17Low, 'は', '山', '本', '博', 'で', 'す']),
-            new string(['山', '本', '博'])
-        ));
-        Assert.IsFalse(ItaijiUtil.ContainsIgnoreIvs(
-            new string(['私', 'は', '山', '本', '博', 'で', 'す']),
-            new string(['山', '本', '専'])
-        ));
+        Assert.AreEqual(data.ExpectContainsIgnoreIvs, ItaijiUtility.Contains(data.Source(), data.Target(), IvsComparison.IgnoreIvs));
+        Assert.AreEqual(data.ExpectContainsExactly, ItaijiUtility.Contains(data.Source(), data.Target(), IvsComparison.ExactMatch));
     }
 
     [TestMethod]
-    public void FindIndexIgnoreIvsTest()
+    [DynamicData(nameof(FindIndexTestDataSamples))]
+    public void FindIndexIgnoreIvsTest(FindIndexTestData data)
     {
-        Assert.AreEqual((2, 3), ItaijiUtil.FindIndexIgnoreIvs(
-            new string(['私', 'は', '山', '本', '博', 'で', 'す']),
-            new string(['山', '本', '博'])
-        ));
-        Assert.AreEqual((2, 5), ItaijiUtil.FindIndexIgnoreIvs(
-            new string(['私', 'は', '山', '本', '博', VS17High, VS17Low, 'で', 'す']),
-            new string(['山', '本', '博'])
-        ));
-        Assert.AreEqual((2, 3), ItaijiUtil.FindIndexIgnoreIvs(
-            new string(['私', 'は', '山', '本', '博', 'で', 'す']),
-            new string(['山', '本', '博', VS17High, VS17Low])
-        ));
-        Assert.AreEqual((4, 3), ItaijiUtil.FindIndexIgnoreIvs(
-            new string(['私', VS17High, VS17Low, 'は', '山', '本', '博', 'で', 'す']),
-            new string(['山', '本', '博'])
-        ));
-        Assert.AreEqual((-1, 0), ItaijiUtil.FindIndexIgnoreIvs(
-            new string(['私', 'は', '山', '本', '博', 'で', 'す']),
-            new string(['山', '本', '専'])
-        ));
+        Assert.AreEqual(data.ExpectedIndexAndLength(), ItaijiUtility.FindIndex(data.Source(), data.Target(), IvsComparison.IgnoreIvs));
     }
 
     [TestMethod]
@@ -315,33 +348,20 @@ public sealed class ItaijiTest
 
     [TestMethod]
     [DynamicData(nameof(IvsSamples))]
-    public void ISAttributeTest(TestData dt)
-    {
-        var kanji = dt.KanjiFunc();
-        Assert.AreEqual(dt.IsAdobeJapan, kanji.IsAdobeJapan);
-        Assert.AreEqual(dt.IsHanyoDenshi, kanji.IsHanyoDenshi);
-        Assert.AreEqual(dt.IsMojiJoho, kanji.IsMojiJoho);
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(IvsSamples))]
     public void ValidTest(TestData dt)
     {
         var str = dt.KanjiFunc().ToString();
-        Assert.AreEqual(dt.IsValidAsAdobeJapan, str.IsValidAsAdobeJapan());
-        Assert.AreEqual(dt.IsValidAsHanyoDenshi, str.IsValidAsHanyoDenshi());
-        Assert.AreEqual(dt.IsValidAsMojiJoho, str.IsValidAsMojiJoho());
+        Assert.AreEqual(!dt.IsValidAsAdobeJapan, str.HasInvalidIvsAsAdobeJapan1());
+        Assert.AreEqual(!dt.IsValidAsHanyoDenshi, str.HasInvalidIvsAsHanyoDenshi());
+        Assert.AreEqual(!dt.IsValidAsMojiJoho, str.HasInvalidIvsAsMojiJoho());
     }
 
     public class TestData
     {
         public Func<KanjiChar> KanjiFunc { get; set; }
-        public IvsType ExpectedIvsType { get; set; }
+        public IvsCollectionType ExpectedIvsType { get; set; }
         public string ExpectedString { get; set; }
         public bool IsVariation { get; set; }
-        public bool IsAdobeJapan { get; set; }
-        public bool IsHanyoDenshi { get; set; }
-        public bool IsMojiJoho { get; set; }
         public bool IsValidAsAdobeJapan { get; set; }
         public bool IsValidAsHanyoDenshi { get; set; }
         public bool IsValidAsMojiJoho { get; set; }
@@ -355,12 +375,9 @@ public sealed class ItaijiTest
         {
             new TestData {
                 KanjiFunc = () => new KanjiChar('博'),
-                ExpectedIvsType = IvsType.None,
+                ExpectedIvsType = IvsCollectionType.None,
                 ExpectedString = char.ConvertFromUtf32(0x535A),
                 IsVariation = false,
-                IsAdobeJapan = false,
-                IsHanyoDenshi = false,
-                IsMojiJoho = false,
                 IsValidAsAdobeJapan = true,
                 IsValidAsHanyoDenshi = true,
                 IsValidAsMojiJoho = true
@@ -370,12 +387,9 @@ public sealed class ItaijiTest
         {
             new TestData {
                 KanjiFunc = () => new KanjiChar('博', 0x00),
-                ExpectedIvsType = IvsType.AdobeJapan,
+                ExpectedIvsType = IvsCollectionType.AdobeJapan,
                 ExpectedString = char.ConvertFromUtf32(0x535A) + char.ConvertFromUtf32(0xE0100),
                 IsVariation = true,
-                IsAdobeJapan = true,
-                IsHanyoDenshi = false,
-                IsMojiJoho = false,
                 IsValidAsAdobeJapan = true,
                 IsValidAsHanyoDenshi = false,
                 IsValidAsMojiJoho = false
@@ -385,12 +399,9 @@ public sealed class ItaijiTest
         {
             new TestData {
                 KanjiFunc =  () => new KanjiChar('博', 0x02),
-                ExpectedIvsType = IvsType.HDandMJ,
+                ExpectedIvsType = IvsCollectionType.HDandMJ,
                 ExpectedString=  char.ConvertFromUtf32(0x535A) + char.ConvertFromUtf32(0xE0102),
                 IsVariation = true,
-                IsAdobeJapan= false,
-                IsHanyoDenshi= true,
-                IsMojiJoho= true,
                 IsValidAsAdobeJapan= false,
                 IsValidAsHanyoDenshi= true,
                 IsValidAsMojiJoho= true
@@ -400,12 +411,9 @@ public sealed class ItaijiTest
         {
             new TestData {
                 KanjiFunc = () =>  new KanjiChar('博', 0x07),
-                ExpectedIvsType = IvsType.HanyoDenshi,
+                ExpectedIvsType = IvsCollectionType.HanyoDenshi,
                 ExpectedString = char.ConvertFromUtf32(0x535A) + char.ConvertFromUtf32(0xE0107),
                 IsVariation = true,
-                IsAdobeJapan = false,
-                IsHanyoDenshi = true,
-                IsMojiJoho = false,
                 IsValidAsAdobeJapan = false,
                 IsValidAsHanyoDenshi = true,
                 IsValidAsMojiJoho = false
@@ -415,12 +423,9 @@ public sealed class ItaijiTest
             new TestData {
 
                 KanjiFunc = () => new KanjiChar('博', 0x0A),
-                ExpectedIvsType= IvsType.MojiJoho,
+                ExpectedIvsType= IvsCollectionType.MojiJoho,
                 ExpectedString = char.ConvertFromUtf32(0x535A) + char.ConvertFromUtf32(0xE010A),
                 IsVariation= true,
-                IsAdobeJapan= false,
-                IsHanyoDenshi= false,
-                IsMojiJoho= true,
                 IsValidAsAdobeJapan = false,
                 IsValidAsHanyoDenshi = false,
                 IsValidAsMojiJoho = true
@@ -429,12 +434,9 @@ public sealed class ItaijiTest
         yield return new object[] {
             new TestData {
                 KanjiFunc = () => new KanjiChar('博', 0x10),
-                ExpectedIvsType =  IvsType.Unknown,
+                ExpectedIvsType =  IvsCollectionType.Unknown,
                 ExpectedString = char.ConvertFromUtf32(0x535A) + char.ConvertFromUtf32(0xE0110),
                 IsVariation= true,
-                IsAdobeJapan= false,
-                IsHanyoDenshi= false,
-                IsMojiJoho= false,
                 IsValidAsAdobeJapan= false,
                 IsValidAsHanyoDenshi= false,
                 IsValidAsMojiJoho= false
@@ -447,7 +449,7 @@ public sealed class ItaijiTest
     public void IvsTypeTest(TestData dt)
     {
         var kanji = dt.KanjiFunc();
-        Assert.AreEqual(dt.ExpectedIvsType, kanji.IvsType);
+        Assert.AreEqual(dt.ExpectedIvsType, kanji.GetIvsCollectionType());
     }
 
     [TestMethod]
@@ -544,9 +546,9 @@ public sealed class ItaijiTest
     [TestMethod]
     public void RemoveIvsTest()
     {
-        Assert.AreEqual("あいうえお", ItaijiUtil.RemoveIvs("あいうえお"));
-        Assert.AreEqual("山本博", ItaijiUtil.RemoveIvs(new string(['山', '本', '博', VS17High, VS17Low])));
-        Assert.AreEqual("", ItaijiUtil.RemoveIvs(new string([VS17High, VS17Low])));
+        Assert.AreEqual("あいうえお", ItaijiUtility.RemoveIvs("あいうえお"));
+        Assert.AreEqual("山本博", ItaijiUtility.RemoveIvs(new string(['山', '本', '博', VS17High, VS17Low])));
+        Assert.AreEqual("", ItaijiUtility.RemoveIvs(new string([VS17High, VS17Low])));
 
     }
 }

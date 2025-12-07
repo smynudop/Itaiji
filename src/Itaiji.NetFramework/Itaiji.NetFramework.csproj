@@ -13,17 +13,9 @@
 			<_Parameter1>Itaiji.NetFramework.Test</_Parameter1>
 		</AssemblyAttribute>
 	</ItemGroup>
-	
+
 	<ItemGroup>
-	  <Compile Include="..\Shared\EnumExtension.cs" Link="EnumExtension.cs" />
-	  <Compile Include="..\Shared\globalUsing.cs" Link="globalUsing.cs" />
-	  <Compile Include="..\Shared\ItaijiUtil.cs" Link="ItaijiUtil.cs" />
-	  <Compile Include="..\Shared\IvsType.cs" Link="IvsType.cs" />
-	  <Compile Include="..\Shared\Kanji.cs" Link="Kanji.cs" />
-	  <Compile Include="..\Shared\KanjiEnumerator.cs" Link="KanjiEnumerator.cs" />
-	  <Compile Include="..\Shared\Library.cs" Link="Library.cs" />
-	  <Compile Include="..\Shared\RuneExtension.cs" Link="RuneExtension.cs" />
-	  <Compile Include="..\Shared\StringExtension.cs" Link="StringExtension.cs" />
+		<Compile Include="..\Shared\**\*.cs" Exclude="..\Shared\obj\**\*.cs" />
 	</ItemGroup>
 
 </Project>

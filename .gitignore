@@ -6,3 +6,4 @@ packages/
 
 *.suo
 IVD_Sequences.txt
+docfx/

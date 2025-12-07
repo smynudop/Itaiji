@@ -1,4 +1,4 @@
-﻿namespace Itaiji;
+﻿namespace Itaiji.Extensions;
 
 /// <summary>
 /// 

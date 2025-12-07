@@ -1,4 +1,6 @@
-﻿namespace Itaiji.Test;
+﻿using Itaiji.Extensions;
+
+namespace Itaiji.Test;
 
 [TestClass]
 public class ItaijiTestSpan

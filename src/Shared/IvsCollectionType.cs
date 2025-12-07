@@ -1,10 +1,11 @@
 ﻿namespace Itaiji;
 
 /// <summary>
-/// 異体字がどのセットで有効かを表します。ビットマスクで表現されます。
+/// 異体字が有効なコレクションを表します。
+/// 同一のコードポイントを複数のセットで共有する可能性があるため、ビットマスクで表現されます。
 /// </summary>
 [Flags]
-public enum IvsType : int
+public enum IvsCollectionType : int
 {
     /// <summary>
     /// この字は異体字セレクタを持ちません。
@@ -15,11 +16,11 @@ public enum IvsType : int
     /// </summary>
     AdobeJapan = 1 << 0,
     /// <summary>
-    /// Hanyo Denshiとして有効な異体字です。
+    /// Hanyo-Denshiとして有効な異体字です。
     /// </summary>
     HanyoDenshi = 1 << 1,
     /// <summary>
-    /// Moji-Johoとして有効な異体字です。
+    /// Moji_Johoとして有効な異体字です。
     /// </summary>
     MojiJoho = 1 << 2,
 

@@ -1,9 +1,8 @@
-﻿using System.Text;
-#if NETSTANDARD2_0 || NETFRAMEWORK
+﻿#if NETSTANDARD2_0 || NETFRAMEWORK
 using Itaiji.Text;
 #endif
 
-namespace Itaiji;
+namespace Itaiji.Extensions;
 
 /// <summary>
 /// Runeの拡張メソッドを提供します。

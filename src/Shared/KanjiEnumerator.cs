@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using System.Text;
+using Itaiji.Extensions;
 #if NETSTANDARD2_0 || NETFRAMEWORK
 using Itaiji.Text;
 #endif
