@@ -16,6 +16,8 @@
 	  <RepositoryUrl>https://github.com/smynudop/Itaiji</RepositoryUrl>
 	  <Copyright>copyright (c) udop 2025</Copyright>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageTags>unicode,variation selectors,ivs,rune,異体字,人名</PackageTags>
+	  <Description>Itaijiは、Unicodeにおける異体字を扱うためのライブラリです。</Description>
   </PropertyGroup>
 
 	<ItemGroup>
@@ -26,6 +28,7 @@
 
 	<ItemGroup>
 		<Compile Include="..\Shared\**\*.cs" Exclude="..\Shared\obj\**\*.cs" />
+		<None Include="..\docs\README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>

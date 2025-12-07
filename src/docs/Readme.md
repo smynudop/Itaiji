@@ -1,9 +1,16 @@
 ﻿Itaiji
 ===
 
+本ライブラリはバージョン0.xです。予告なく破壊的変更が加えられる可能性があります。
+
 # 概要
 Itaijiは、.NETでUnicodeの異体字(Ideographic Variation Sequence)を便利に扱うためのライブラリです。
+
 .Net 5+, .Net Framework 3.5/4.0/4.5/4.6/4.7/4.8 に対応しています。
+
+# パッケージ
+- Itaiji: .NET 5.0+ 向けのライブラリ
+- Itaiji.NetFramework: .NET Framework 3.5+ 向けのライブラリ
 
 # 主な機能
 - 文字列から異体字セレクタの削除
