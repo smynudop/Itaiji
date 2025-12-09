@@ -160,7 +160,7 @@ public static class StringExtension
     /// <param name="str">調査する文字列</param>
     /// <param name="ivsCollectionType">対象となるコレクションの種類</param>
     /// <returns>指定したコレクションで無効な異体字を含む場合はtrueを返します。</returns>
-    public static bool HasInvalidIvs(this string str, IvsCollectionType ivsCollectionType) => ItaijiUtility.HasInvalidIvs(str, ivsCollectionType);
+    public static bool HasInvalidVariationSelector(this string str, IvsCollectionType ivsCollectionType) => ItaijiUtility.HasInvalidVariationSelector(str, ivsCollectionType);
 
 
     /// <summary>
@@ -168,7 +168,7 @@ public static class StringExtension
     /// </summary>
     /// <param name="str">調査する文字列</param>
     /// <returns>Adobe-Japan1として無効な異体字を含む場合はtrueを返します。</returns>
-    public static bool HasInvalidIvsAsAdobeJapan1(this string str) => ItaijiUtility.HasInvalidIvsAsAdobeJapan1(str);
+    public static bool HasInvalidVariationSelectorAsAdobeJapan1(this string str) => ItaijiUtility.HasInvalidVariationSelectorAsAdobeJapan1(str);
 
 
     /// <summary>
@@ -176,7 +176,7 @@ public static class StringExtension
     /// </summary>
     /// <param name="str">調査する文字列</param>
     /// <returns>Hanyo-Denshiとして無効な異体字を含む場合はtrueを返します。</returns>
-    public static bool HasInvalidIvsAsHanyoDenshi(this string str) => ItaijiUtility.HasInvalidIvsAsHanyoDenshi(str);
+    public static bool HasInvalidVariationSelectorAsHanyoDenshi(this string str) => ItaijiUtility.HasInvalidVariationSelectorAsHanyoDenshi(str);
 
 
     /// <summary>
@@ -184,7 +184,7 @@ public static class StringExtension
     /// </summary>
     /// <param name="str">調査する文字列</param>
     /// <returns>Moji_Johoとして無効な異体字を含む場合はtrueを返します。</returns>
-    public static bool HasInvalidIvsAsMojiJoho(this string str) => ItaijiUtility.HasInvalidIvsAsMojiJoho(str);
+    public static bool HasInvalidVariationSelectorAsMojiJoho(this string str) => ItaijiUtility.HasInvalidVariationSelectorAsMojiJoho(str);
 
 
 

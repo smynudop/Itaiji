@@ -1,24 +1,14 @@
 ﻿#nullable disable
 using Itaiji.Extensions;
+using System.Diagnostics;
 using System.Text;
 #if NETFRAMEWORK
 using Itaiji.Text;
 #endif 
 namespace Itaiji.Test;
 
-[TestClass]
-public sealed class ItaijiTest
+public sealed partial class ItaijiTest
 {
-    public const char HirosiChar = (char)0x535A;
-    public const char HokkeHigh = (char)0xD867;
-    public const char HokkeLow = (char)0xDE3D;
-    public const char VS17High = (char)0xDB40;
-    public const char VS17Low = (char)0xDD00;
-
-    public static Rune Hirosi = new Rune('博');
-    public static Rune Hokke => new Rune(0x29E3D); // 𩸽
-    public static Rune VS17 => new Rune(0xE0100); // 異体字セレクタE0100
-
     public class ConstructorTestData
     {
         public Func<KanjiChar> KanjiFunc { get; set; }
@@ -60,6 +50,15 @@ public sealed class ItaijiTest
         {
             new ConstructorTestData
             {
+                KanjiFunc = () => new KanjiChar(VS1),
+                ExpectedBaseRune = VS1,
+                ExpectedVariationSelector = null
+            }
+        };
+        yield return new object[]
+        {
+            new ConstructorTestData
+            {
                 KanjiFunc = () => new KanjiChar(Hirosi, VS17),
                 ExpectedBaseRune = Hirosi,
                 ExpectedVariationSelector = VS17
@@ -83,6 +82,15 @@ public sealed class ItaijiTest
                 ExpectedVariationSelector = null
             }
         };
+        yield return new object[]
+{
+            new ConstructorTestData
+            {
+                KanjiFunc = () => new KanjiChar(Kami, VS1),
+                ExpectedBaseRune = Kami,
+                ExpectedVariationSelector = VS1
+            }
+};
         yield return new object[]
         {
             new ConstructorTestData
@@ -146,33 +154,15 @@ public sealed class ItaijiTest
                 ExpectedVariationSelector = VS17
             }
         };
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(ConstructorTestDataSamples))]
-    public void ConstructorTest(ConstructorTestData data)
-    {
-        var kanji = data.KanjiFunc();
-        Assert.AreEqual(data.ExpectedBaseRune, kanji.BaseRune);
-        Assert.AreEqual(data.ExpectedVariationSelector, kanji.VariationSelector);
-    }
-
-    [TestMethod]
-    public void ConstructorInvalidTest()
-    {
-        Assert.Throws<ArgumentException>(() => new KanjiChar(VS17High));
-
-        Assert.Throws<ArgumentException>(() => new KanjiChar(Hirosi, Hirosi));
-
-        Assert.Throws<ArgumentException>(() => new KanjiChar(VS17High));
-
-        Assert.Throws<ArgumentException>(() => new KanjiChar(new string([]), VS17));
-        Assert.Throws<ArgumentException>(() => new KanjiChar(new string([HirosiChar, HirosiChar]), VS17));
-        Assert.Throws<ArgumentException>(() => new KanjiChar(new string([HirosiChar]), Hirosi));
-
-        Assert.Throws<ArgumentException>(() => new KanjiChar(new string([])));
-        Assert.Throws<ArgumentException>(() => new KanjiChar(new string([HirosiChar, HirosiChar])));
-        Assert.Throws<ArgumentException>(() => new KanjiChar(new string([HirosiChar, VS17High, VS17Low, HirosiChar])));
+        yield return new object[]
+        {
+            new ConstructorTestData
+            {
+                KanjiFunc = () => new KanjiChar(new string([KamiChar, VS1Char])),
+                ExpectedBaseRune = Kami,
+                ExpectedVariationSelector = VS1
+            }
+        };
     }
 
     public class EqualsTestData
@@ -220,14 +210,6 @@ public sealed class ItaijiTest
                 Expected = false
             }
         };
-    }
-    [TestMethod]
-    [DynamicData(nameof(EqualsTestDataSamples))]
-    public void EqualsTest(EqualsTestData data)
-    {
-        var strA = data.A().Select(rune => rune.ToString()).Aggregate((a, b) => a + b);
-        var strB = data.B().Select(rune => rune.ToString()).Aggregate((a, b) => a + b);
-        Assert.AreEqual(data.Expected, ItaijiUtility.EqualsIgnoreIvs(strA, strB));
     }
 
     public class FindIndexTestData
@@ -296,64 +278,6 @@ public sealed class ItaijiTest
                 ExpectContainsIgnoreIvs = false
             }
         };
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(FindIndexTestDataSamples))]
-    public void ContainsIgnoreIvsTest(FindIndexTestData data)
-    {
-        Assert.AreEqual(data.ExpectContainsIgnoreIvs, ItaijiUtility.Contains(data.Source(), data.Target(), IvsComparison.IgnoreIvs));
-        Assert.AreEqual(data.ExpectContainsExactly, ItaijiUtility.Contains(data.Source(), data.Target(), IvsComparison.ExactMatch));
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(FindIndexTestDataSamples))]
-    public void FindIndexIgnoreIvsTest(FindIndexTestData data)
-    {
-        Assert.AreEqual(data.ExpectedIndexAndLength(), ItaijiUtility.FindIndex(data.Source(), data.Target(), IvsComparison.IgnoreIvs));
-    }
-
-    [TestMethod]
-    [Timeout(100, CooperativeCancellation = true)]
-    public void EnumerateKanjiTest1()
-    {
-        var str = "辻太郎"; // ふつうの辻
-        var en = str.EnumerateKanji().ToList();
-        CollectionAssert.AreEqual(new KanjiChar[3] {
-            new KanjiChar('辻'),
-            new KanjiChar('太'),
-            new KanjiChar('郎')
-        }, en);
-    }
-
-    [TestMethod]
-    public void EnumerateKanjiTest2()
-    {
-        var str = "辻󠄀太郎"; // adobe-japanのツジ
-        var en = str.EnumerateKanji().ToList();
-        CollectionAssert.AreEqual(new KanjiChar[3] {
-            new KanjiChar('辻', 0x00),
-            new KanjiChar('太'),
-            new KanjiChar('郎')
-        }, en);
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(IvsSamples))]
-    public void IsVariationTest(TestData dt)
-    {
-        var kanji = dt.KanjiFunc();
-        Assert.AreEqual(dt.IsVariation, kanji.IsVariation);
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(IvsSamples))]
-    public void ValidTest(TestData dt)
-    {
-        var str = dt.KanjiFunc().ToString();
-        Assert.AreEqual(!dt.IsValidAsAdobeJapan, str.HasInvalidIvsAsAdobeJapan1());
-        Assert.AreEqual(!dt.IsValidAsHanyoDenshi, str.HasInvalidIvsAsHanyoDenshi());
-        Assert.AreEqual(!dt.IsValidAsMojiJoho, str.HasInvalidIvsAsMojiJoho());
     }
 
     public class TestData
@@ -442,22 +366,28 @@ public sealed class ItaijiTest
                 IsValidAsMojiJoho= false
             }
         };
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(IvsSamples))]
-    public void IvsTypeTest(TestData dt)
-    {
-        var kanji = dt.KanjiFunc();
-        Assert.AreEqual(dt.ExpectedIvsType, kanji.GetIvsCollectionType());
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(IvsSamples))]
-    public void ToStringTest(TestData dt)
-    {
-        var kanji = dt.KanjiFunc();
-        Assert.AreEqual(dt.ExpectedString, kanji.ToString());
+        yield return new object[] {
+            new TestData {
+                KanjiFunc = () => new KanjiChar('神', 0xF0),
+                ExpectedIvsType =  IvsCollectionType.CJKCompatibilityIdeographs,
+                ExpectedString = char.ConvertFromUtf32(0x795E) + char.ConvertFromUtf32(0xFE00),
+                IsVariation= true,
+                IsValidAsAdobeJapan= false,
+                IsValidAsHanyoDenshi= false,
+                IsValidAsMojiJoho= false,
+            }
+        };
+        yield return new object[] {
+            new TestData {
+                KanjiFunc = () => new KanjiChar('神', 0xF2),
+                ExpectedIvsType =  IvsCollectionType.Unknown,
+                ExpectedString = char.ConvertFromUtf32(0x795E) + char.ConvertFromUtf32(0xFE02),
+                IsVariation= true,
+                IsValidAsAdobeJapan= false,
+                IsValidAsHanyoDenshi= false,
+                IsValidAsMojiJoho= false,
+            }
+        };
     }
 
     public class LengthData
@@ -514,7 +444,7 @@ public sealed class ItaijiTest
         {
             new LengthData
             {
-                KanjiFunc = () => default(KanjiChar), // '博' with VS2
+                KanjiFunc = () => default(KanjiChar),
                 ExpectedUtf8Length = 1,
                 ExpectedUtf16Length = 1,
                 ExpectedUtf32Length = 1
@@ -522,33 +452,39 @@ public sealed class ItaijiTest
         };
     }
 
-    [TestMethod]
-    [DynamicData(nameof(LengthDataSamples))]
-    public void Utf32SequenceLengthTest(LengthData dt)
+    public class EnumerateTestData
     {
-        Assert.AreEqual(dt.ExpectedUtf32Length, dt.KanjiFunc().Utf32SequenceLength);
+        public Func<string> Source { get; set; }
+        public Func<List<KanjiChar>> ExpectedKanjiChars { get; set; }
     }
 
-    [TestMethod]
-    [DynamicData(nameof(LengthDataSamples))]
-    public void Utf16SequenceLengthTest(LengthData dt)
+    public static IEnumerable<object[]> EnumerateTestDataSamples()
     {
-        Assert.AreEqual(dt.ExpectedUtf16Length, dt.KanjiFunc().Utf16SequenceLength);
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(LengthDataSamples))]
-    public void Utf8SequenceLengthTest(LengthData dt)
-    {
-        Assert.AreEqual(dt.ExpectedUtf8Length, dt.KanjiFunc().Utf8SequenceLength);
-    }
-
-    [TestMethod]
-    public void RemoveIvsTest()
-    {
-        Assert.AreEqual("あいうえお", ItaijiUtility.RemoveIvs("あいうえお"));
-        Assert.AreEqual("山本博", ItaijiUtility.RemoveIvs(new string(['山', '本', '博', VS17High, VS17Low])));
-        Assert.AreEqual("", ItaijiUtility.RemoveIvs(new string([VS17High, VS17Low])));
-
+        yield return new object[]
+        {
+            new EnumerateTestData
+            {
+                Source = () => new string (['山', '本', '博', VS17High, VS17Low]),
+                ExpectedKanjiChars = () => new List<KanjiChar>
+                {
+                    new KanjiChar('山'),
+                    new KanjiChar('本'),
+                    new KanjiChar(new Rune('博'), VS17),
+                }
+            }
+        };
+        yield return new object[]
+        {
+            new EnumerateTestData
+            {
+                Source = () => new string (['山', '本', '神', VS1Char]),
+                ExpectedKanjiChars = () => new List<KanjiChar>
+                {
+                    new KanjiChar('山'),
+                    new KanjiChar('本'),
+                    new KanjiChar(new Rune('神'), VS1),
+                }
+            }
+        };
     }
 }

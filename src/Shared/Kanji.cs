@@ -26,7 +26,7 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
     /// <summary>
     /// 異体字セレクター。存在しない場合はnull
     /// </summary>
-    /// <remarks>0xE0100～0xE01EFの範囲</remarks>
+    /// <remarks>IVS(0xE0100～0xE01EF)またはSVS(0xFE00~0xFE0F)の範囲</remarks>
     public readonly Rune? VariationSelector
     {
         get => _VariationSelector.Value != 0 ? _VariationSelector : null;
@@ -49,29 +49,29 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
     /// ベースのRuneと異体字セレクターのRuneからKanjiCharを生成します。
     /// </summary>
     /// <param name="_base"></param>
-    /// <param name="ivs"></param>
+    /// <param name="variationSelector"></param>
     /// <exception cref="ArgumentException">異体字セレクタが無効だった場合</exception>"
-    public KanjiChar(Rune _base, Rune ivs)
+    public KanjiChar(Rune _base, Rune variationSelector)
     {
-        if (!ivs.IsIvs() && ivs != default)
+        if (!variationSelector.IsVariationSelector() && variationSelector != default)
         {
-            throw new ArgumentException("異体字セレクターの範囲外の値です。", nameof(ivs));
+            throw new ArgumentException("異体字セレクターの範囲外の値です。", nameof(variationSelector));
         }
         this._BaseRune = _base;
-        this._VariationSelector = ivs;
+        this._VariationSelector = variationSelector;
     }
 
     /// <summary>
     /// ベースとなる文字と異体字セレクターからKanjiCharを生成します。
     /// </summary>
     /// <param name="str"></param>
-    /// <param name="ivs"></param>
+    /// <param name="variationSelector"></param>
     /// <exception cref="ArgumentException">ベースとなる文字が1文字ではなかった場合、または異体字セレクタが無効だった場合</exception>
-    public KanjiChar(string str, Rune ivs)
+    public KanjiChar(string str, Rune variationSelector)
     {
-        if (!ivs.IsIvs() && ivs != default)
+        if (!variationSelector.IsVariationSelector() && variationSelector != default)
         {
-            throw new ArgumentException("異体字セレクターの範囲外の値です。", nameof(ivs));
+            throw new ArgumentException("異体字セレクターの範囲外の値です。", nameof(variationSelector));
         }
         var runes = str.EnumerateRunes();
         if (!runes.MoveNext())
@@ -83,7 +83,7 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
         {
             throw new ArgumentException("ベース文字が複数あります。", nameof(str));
         }
-        this._VariationSelector = ivs;
+        this._VariationSelector = variationSelector;
     }
 
     /// <summary>
@@ -101,7 +101,7 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
         this._BaseRune = runes.Current;
         if (runes.MoveNext())
         {
-            if (runes.Current.IsIvs())
+            if (runes.Current.IsVariationSelector())
             {
                 this._VariationSelector = runes.Current;
                 if (runes.MoveNext())
@@ -138,26 +138,40 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
     internal KanjiChar(char _base, byte ivs)
     {
         this._BaseRune = new Rune(_base);
-        this._VariationSelector = new Rune(0xE0100 | ivs);
+        if (ivs >= 0xF0)
+        {
+            this._VariationSelector = new Rune(0xFE00 + (ivs - 0xF0));
+        } 
+        else
+        {
+            this._VariationSelector = new Rune(0xE0100 | ivs);
+
+        }
     }
 
     /// <summary>
-    /// 異体字セレクタが属するIVSコレクションの種類を取得します。
+    /// 異体字セレクタが属するコレクションの種類を取得します。
     /// ライブラリが対応していない異体字の場合は<see cref="IvsCollectionType.Unknown"/>を返します。
     /// </summary>
-    public IvsCollectionType GetIvsCollectionType()
+    public IvsCollectionType GetVsCollectionType()
     {
         if (_VariationSelector == default)
         {
             return IvsCollectionType.None;
         }
-        else if (Library.JpIvsList.TryGetValue(this.GetHashCode(), out var type))
+
+        if (_VariationSelector.IsBmp)
         {
-            return (IvsCollectionType)type;
+            return Library.StandardizedVariants.Contains(this.GetCode())
+                ? IvsCollectionType.CJKCompatibilityIdeographs
+                : IvsCollectionType.Unknown;
         }
         else
         {
-            return IvsCollectionType.Unknown;
+            return Library.JpIvsList.TryGetValue(this.GetCode(), out var type)
+                ? (IvsCollectionType)type
+                : IvsCollectionType.Unknown;
+
         }
     }
 
@@ -165,6 +179,16 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
     /// この文字が異体字セレクターを持つかどうかを取得します。
     /// </summary>
     public readonly bool IsVariation { get => _VariationSelector != default; }
+
+    /// <summary>
+    /// この文字がIvsを持つかどうかを取得します。
+    /// </summary>
+    public readonly bool IsIvs { get => _VariationSelector.IsIvs(); }
+
+    /// <summary>
+    /// この文字がSvsを持つかどうかを取得します。
+    /// </summary>
+    public readonly bool IsSvs { get => _VariationSelector.IsSvs(); }
 
     /// <summary>
     /// Utf32におけるシーケンス長を取得します。
@@ -280,10 +304,27 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
         return _VariationSelector.CompareTo(other.NonNullVariationSelector);
     }
 
+    /// <summary>
+    /// ライブラリ検索用のコードを取得(IVS・SVSがある場合のみ)
+    /// </summary>
+    /// <returns></returns>
+    private int GetCode()
+    {
+        if (_VariationSelector.IsBmp)
+        {
+            return (_BaseRune.Value << 8) | ((_VariationSelector.Value & 0xFF) + 0xF0);
+        }
+        else
+        {
+            return (_BaseRune.Value << 8) | ((_VariationSelector.Value & 0xFF));
+        }
+    }
+
     /// <inheritdoc/>
     public override readonly int GetHashCode()
     {
-        return (_BaseRune.Value << 8) | (_VariationSelector.Value & 0xFF); // defaultの場合は0なので問題なし
+        // TODO: 衝突の危険はないだろうか？
+        return _BaseRune.GetHashCode() ^ _VariationSelector.GetHashCode();
     }
 
     /// <inheritdoc/>

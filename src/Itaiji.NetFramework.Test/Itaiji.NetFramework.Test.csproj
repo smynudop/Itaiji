@@ -8,10 +8,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="..\Shared.Test\MSTestSettings.cs" Link="MSTestSettings.cs" />
-    <Compile Include="..\Shared.Test\Test1.cs" Link="Test1.cs" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\Shared.Test\**\*.cs" Exclude="..\Shared.Test\obj\**\*.cs" />
+	</ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MSTest" Version="4.0.1" />

@@ -68,7 +68,7 @@ public ref struct SpanKanjiEnumerator : IEnumerator<KanjiChar>
             _prev = default;
             return true;
         }
-        if (next.IsIvs() && !_prev.IsIvs())
+        if (next.IsVariationSelector() && !_prev.IsVariationSelector())
         {
             _current = new KanjiChar(_prev, next);
             _prev = default;

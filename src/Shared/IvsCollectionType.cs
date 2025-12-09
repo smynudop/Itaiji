@@ -23,11 +23,15 @@ public enum IvsCollectionType : int
     /// Moji_Johoとして有効な異体字です。
     /// </summary>
     MojiJoho = 1 << 2,
+    /// <summary>
+    /// CJK互換異体字として有効な異体字です。
+    /// </summary>
+    CJKCompatibilityIdeographs = 1<< 3,
 
     /// <summary>
     /// このライブラリでは未知の異体字です。
     /// </summary>
-    Unknown = 1 << 10,
+    Unknown = 1 << 31,
 
     /// <summary>
     /// Hanyo-DenshiおよびMoji-Johoとして有効な異体字です。

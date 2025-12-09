@@ -2,42 +2,28 @@
 
 namespace Itaiji.Test;
 
-[TestClass]
-public class ItaijiTestSpan
+public partial class ItaijiTest
 {
-    [TestMethod]
-    [Timeout(100, CooperativeCancellation = true)]
-    public void EnumerateKanjiTest1()
+
+    private static IEnumerable<T> EnumerateHelper<T>(IEnumerator<T> items)
     {
-        var str = "辻太郎"; // ふつうの辻
-        var list = new List<KanjiChar>();
-        foreach (var k in str.AsSpan().EnumerateKanji())
+        while (items.MoveNext())
         {
-            list.Add(k);
+            yield return items.Current;
         }
-        CollectionAssert.AreEqual(new KanjiChar[3] {
-            new KanjiChar('辻'),
-            new KanjiChar('太'),
-            new KanjiChar('郎')
-        }, list);
     }
 
     [TestMethod]
-    public void EnumerateKanjiTest2()
+    [DynamicData(nameof(EnumerateTestDataSamples))]
+    public void EnumerateKanjiSpanTest(EnumerateTestData data)
     {
-        var str = "辻󠄀太郎"; // adobe-japanのツジ
         var list = new List<KanjiChar>();
-        foreach (var k in str.AsSpan().EnumerateKanji())
-        {
-            list.Add(k);
+        var enumerator = data.Source().AsSpan().EnumerateKanji();   
+        foreach (var item in enumerator) {
+            list.Add(item);
         }
-        var en = str.AsSpan().EnumerateKanji();
-        CollectionAssert.AreEqual(new KanjiChar[3] {
-            new KanjiChar('辻', 0x00),
-            new KanjiChar('太'),
-            new KanjiChar('郎')
-        }, list);
+
+
+        CollectionAssert.AreEqual(data.ExpectedKanjiChars(),list);
     }
-
-
 }

@@ -214,7 +214,7 @@ public static class ItaijiUtility
         char[] result = new char[str.Length];
         foreach (var rune in str.EnumerateRunes())
         {
-            if (rune.IsIvs())
+            if (rune.IsVariationSelector())
             {
                 continue;
             }
@@ -227,7 +227,7 @@ public static class ItaijiUtility
         Span<char> result = new char[str.Length];
         foreach (var rune in str.AsSpan().EnumerateRunes())
         {
-            if (rune.IsIvs())
+            if (rune.IsVariationSelector())
             {
                 continue;
             }
@@ -243,7 +243,7 @@ public static class ItaijiUtility
     /// <param name="str">調査する文字列</param>
     /// <param name="targetType">対象となるコレクションの種類</param>
     /// <returns>指定したコレクションで無効な異体字を含む場合はtrueを返します。</returns>
-    public static bool HasInvalidIvs(string str, IvsCollectionType targetType)
+    public static bool HasInvalidVariationSelector(string str, IvsCollectionType targetType)
     {
         if(targetType == IvsCollectionType.None)
         {
@@ -252,7 +252,7 @@ public static class ItaijiUtility
 
         foreach (var kanji in str.EnumerateKanji())
         {
-            var ivsType = kanji.GetIvsCollectionType();
+            var ivsType = kanji.GetVsCollectionType();
             if (ivsType != IvsCollectionType.None && !ivsType.HasBitFlag(targetType))
             {
                 return true;
@@ -266,21 +266,21 @@ public static class ItaijiUtility
     /// </summary>
     /// <param name="str">調査する文字列</param>
     /// <returns>Adobe-Japan1として無効な異体字を含む場合はtrueを返します。</returns>
-    public static bool HasInvalidIvsAsAdobeJapan1(string str) => HasInvalidIvs(str, IvsCollectionType.AdobeJapan);
+    public static bool HasInvalidVariationSelectorAsAdobeJapan1(string str) => HasInvalidVariationSelector(str, IvsCollectionType.AdobeJapan);
 
     /// <summary>
     /// Hanyo-Denshiとして無効な異体字を含むかどうかを判定します。
     /// </summary>
     /// <param name="str">調査する文字列</param>
     /// <returns>Hanyo-Denshiとして無効な異体字を含む場合はtrueを返します。</returns>
-    public static bool HasInvalidIvsAsHanyoDenshi(string str) => HasInvalidIvs(str, IvsCollectionType.HanyoDenshi);
+    public static bool HasInvalidVariationSelectorAsHanyoDenshi(string str) => HasInvalidVariationSelector(str, IvsCollectionType.HanyoDenshi);
 
     /// <summary>
     /// Moji_Johoとして無効な異体字を含むかどうかを判定します。
     /// </summary>
     /// <param name="str">調査する文字列</param>
     /// <returns>Moji_Johoとして無効な異体字を含む場合はtrueを返します。</returns>
-    public static bool HasInvalidIvsAsMojiJoho(string str) => HasInvalidIvs(str, IvsCollectionType.MojiJoho);
+    public static bool HasInvalidVariationSelectorAsMojiJoho(string str) => HasInvalidVariationSelector(str, IvsCollectionType.MojiJoho);
 
 
 }
