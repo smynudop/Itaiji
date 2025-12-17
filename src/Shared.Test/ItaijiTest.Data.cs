@@ -487,4 +487,110 @@ public sealed partial class ItaijiTest
             }
         };
     }
+
+    public class CIConvertTestData
+    {
+        public Func<string> CIRune { get; set; } 
+        public Func<string> SvsRune { get; set; } 
+        public Func<string> AdobeJapan1IvsRune { get; set; } 
+        public Func<string> MojiJohoIvsRune { get; set; } 
+    }
+
+    public static IEnumerable<object[]> CIConvertTestDataSamples()
+    {
+        yield return new object[]
+        {
+            new CIConvertTestData
+            {
+                CIRune = () => $"私は{new Rune(0xFA19)}だ",
+                SvsRune = () => $"私は{new Rune(0x795E)}{new Rune(0xFE00)}だ",
+                AdobeJapan1IvsRune = () =>  $"私は{new Rune(0x795E)}{new Rune(0xE0100)}だ",
+                MojiJohoIvsRune = () => $"私は{new Rune(0x795E)}{new Rune(0xE0103)}だ",
+            }
+        };
+        yield return new object[]
+{
+            new CIConvertTestData
+            {
+                CIRune = () => $"私は{new Rune(0x795E)}{new Rune(0xFE00)}だ",
+                SvsRune = () => $"私は{new Rune(0x795E)}{new Rune(0xFE00)}だ",
+                AdobeJapan1IvsRune = () =>  $"私は{new Rune(0x795E)}{new Rune(0xE0100)}だ",
+                MojiJohoIvsRune = () => $"私は{new Rune(0x795E)}{new Rune(0xE0103)}だ",
+            }
+};
+        yield return new object[]
+        {
+            new CIConvertTestData
+            {
+                CIRune = () => string.Format("{0}{0}{0}", new Rune(0xFA19)),
+                SvsRune = () => string.Format("{0}{0}{0}", new Rune(0x795E).ToString() + new Rune(0xFE00).ToString()),
+                AdobeJapan1IvsRune = () => string.Format("{0}{0}{0}", new Rune(0x795E).ToString() + new Rune(0xE0100).ToString()),
+                MojiJohoIvsRune = () => string.Format("{0}{0}{0}", new Rune(0x795E).ToString() + new Rune(0xE0103).ToString()),
+            }
+        };
+    }
+
+    public class RemoveIvsTestData
+    {
+        public Func<string> Source { get; set; }
+        public Func<string> ExpectedRemoveAll { get; set; }
+        public Func<string> ExpectedRemoveOnlyIvs { get; set; }
+        public Func<string> ExpectedRemoveOnlyIvsToSvs { get; set; }
+
+    }
+
+    public static IEnumerable<object[]> RemoveIvsTestDataSamples()
+    {
+        yield return new object[]
+        {
+            new RemoveIvsTestData
+            {
+                Source = () => new string (['山', '本', '博', VS17High, VS17Low, '神', VS1Char]),
+                ExpectedRemoveAll = () => new string (['山', '本', '博', '神']),
+                ExpectedRemoveOnlyIvs = () => new string (['山', '本', '博', '神', VS1Char]),
+                ExpectedRemoveOnlyIvsToSvs = () => new string (['山', '本', '博', '神', VS1Char]),
+            }
+        };
+        yield return new object[]
+        {
+            new RemoveIvsTestData
+            {
+                Source = () => new string (['山', '本', '神', VS17High, VS17Low]),
+                ExpectedRemoveAll = () => new string (['山', '本', '神']),
+                ExpectedRemoveOnlyIvs = () => new string (['山', '本', '神']),
+                ExpectedRemoveOnlyIvsToSvs = () => new string (['山', '本', '神', VS1Char]),
+            }
+        };
+
+        yield return new object[]
+{
+            new RemoveIvsTestData
+            {
+                Source = () => new string (['山', '本', '神', VS20High, VS20Low]),
+                ExpectedRemoveAll = () => new string (['山', '本', '神']),
+                ExpectedRemoveOnlyIvs = () => new string (['山', '本', '神']),
+                ExpectedRemoveOnlyIvsToSvs = () => new string (['山', '本', '神', VS1Char]),
+            }
+};
+        yield return new object[]
+{
+            new RemoveIvsTestData
+            {
+                Source = () => new string ([VS17High, VS17Low]),
+                ExpectedRemoveAll = () => new string ([]),
+                ExpectedRemoveOnlyIvs = () => new string ([]),
+                ExpectedRemoveOnlyIvsToSvs = () => new string ([]),
+            }
+};
+        yield return new object[]
+{
+            new RemoveIvsTestData
+            {
+                Source = () => new string ([VS1Char]),
+                ExpectedRemoveAll = () => new string ([]),
+                ExpectedRemoveOnlyIvs = () => new string ([VS1Char]),
+                ExpectedRemoveOnlyIvsToSvs = () => new string ([VS1Char]),
+            }
+};
+    }
 }

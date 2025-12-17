@@ -1,4 +1,8 @@
-- name: Introduction
-  href: introduction.md
-- name: Getting Started
+﻿- name: 導入方法
   href: getting-started.md
+- name: IVSについて
+  href: ivs.md
+- name: 互換漢字・SVSについて
+  href: svs.md
+- name: 互換漢字・SVS・IVSの対応表
+  href: svs-matrix.md

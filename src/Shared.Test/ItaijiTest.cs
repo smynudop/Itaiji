@@ -19,6 +19,10 @@ public sealed partial class ItaijiTest
     public const char VS17High = (char)0xDB40;
     public const char VS17Low = (char)0xDD00;
 
+    public const char VS20High = (char)0xDB40;
+    public const char VS20Low = (char)0xDD03;
+
+
     public static Rune Hirosi = new Rune('博');
     public static Rune Hokke => new Rune(0x29E3D); // 𩸽
     public static Rune VS17 => new Rune(0xE0100); // 異体字セレクタE0100
@@ -147,12 +151,13 @@ public sealed partial class ItaijiTest
     }
 
     [TestMethod]
-    public void RemoveIvsTest()
+    [DynamicData(nameof(RemoveIvsTestDataSamples))]
+    public void RemoveIvsTest(RemoveIvsTestData data)
     {
-        Assert.AreEqual("あいうえお", ItaijiUtility.RemoveIvs("あいうえお"));
-        Assert.AreEqual("山本博", ItaijiUtility.RemoveIvs(new string(['山', '本', '博', VS17High, VS17Low])));
-        Assert.AreEqual("", ItaijiUtility.RemoveIvs(new string([VS17High, VS17Low])));
-
+        var source = data.Source();
+        Assert.AreEqual(data.ExpectedRemoveAll(), ItaijiUtility.RemoveVariationSelector(source));
+        Assert.AreEqual(data.ExpectedRemoveOnlyIvs(), ItaijiUtility.RemoveIvs(source, RemoveIvsOption.RemoveAll));
+        Assert.AreEqual(data.ExpectedRemoveOnlyIvsToSvs(), ItaijiUtility.RemoveIvs(source, RemoveIvsOption.RemoveToSvs));
     }
 
     [TestMethod]
@@ -203,5 +208,24 @@ public sealed partial class ItaijiTest
         // GC.KeepAlive(largeHashSet) を呼んでおくと、最適化でオブジェクトが消されるのを防げます。
         GC.KeepAlive(largeHashSet);
 
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(CIConvertTestDataSamples))]
+    public void CIConvertTest(CIConvertTestData data)
+    {
+        var baseStr = data.CIRune();
+        Assert.AreEqual(
+            data.SvsRune(), 
+            ItaijiUtility.ConvertCompatibilityIdeographs(baseStr, CIConvertOption.ToSvs)
+            );
+        Assert.AreEqual(
+            data.AdobeJapan1IvsRune(), 
+            ItaijiUtility.ConvertCompatibilityIdeographs(baseStr, CIConvertOption.ToAdobeJapan1)
+            );
+        Assert.AreEqual(
+            data.MojiJohoIvsRune(), 
+            ItaijiUtility.ConvertCompatibilityIdeographs(baseStr, CIConvertOption.ToMojiJoho)
+            );
     }
 }

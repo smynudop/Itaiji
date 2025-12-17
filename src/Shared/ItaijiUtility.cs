@@ -2,6 +2,8 @@
 using Itaiji.Extensions;
 #if NETSTANDARD2_0 || NETFRAMEWORK
 using Itaiji.Text;
+#else
+using System.Buffers;
 #endif
 
 namespace Itaiji;
@@ -9,7 +11,7 @@ namespace Itaiji;
 /// <summary>
 /// 異体字を考慮した文字列操作のユーティリティ関数を提供します。
 /// </summary>
-public static class ItaijiUtility
+public static partial class ItaijiUtility
 {
 
     /// <summary>
@@ -202,39 +204,67 @@ public static class ItaijiUtility
         return false;
     }
 
+
     /// <summary>
-    /// 文字列から異体字セレクターを除去します。
+    /// 文字列からIvs/Svsをすべてを除去します。
     /// </summary>
     /// <param name="str">対象の文字列</param>
     /// <returns>異体字セレクターを除去した新しい文字列を返します。</returns>
-    public static string RemoveIvs(string str)
+    public static string RemoveVariationSelector(string str)
     {
-#if NETFRAMEWORK
-        int length = 0;
-        char[] result = new char[str.Length];
+        using var sb = new RuneStringBuilder(str.Length);
         foreach (var rune in str.EnumerateRunes())
         {
             if (rune.IsVariationSelector())
             {
                 continue;
             }
-            length += rune.EncodeToUtf16(result, length);
+            sb.Add(rune);
         }
-        return new string(result, 0, length);
+        return sb.ToString();
+    }
 
-#else
-        int length = 0;
-        Span<char> result = new char[str.Length];
-        foreach (var rune in str.AsSpan().EnumerateRunes())
+    /// <summary>
+    /// 文字列からIvsをすべて除去します。
+    /// </summary>
+    /// <param name="str">対象の文字列</param>
+    /// <returns>異体字セレクターを除去した新しい文字列を返します。</returns>
+    public static string RemoveIvs(string str)
+    {
+        return RemoveIvs(str, RemoveIvsOption.RemoveAll);
+    }
+
+    /// <summary>
+    /// 文字列からIvsを除去します。
+    /// </summary>
+    /// <param name="str">対象の文字列</param>
+    /// <param name="option">除去方法</param>
+    /// <returns>異体字セレクターを除去した新しい文字列を返します。</returns>
+    public static string RemoveIvs(string str, RemoveIvsOption option)
+    {
+        using var sb = new RuneStringBuilder(str.Length);
+        foreach (var kanji in str.EnumerateKanji())
         {
-            if (rune.IsVariationSelector())
+            if (kanji.BaseRune.IsIvs())
             {
                 continue;
             }
-            length += rune.EncodeToUtf16(result.Slice(length));
+            sb.Add(kanji.BaseRune);
+            if (kanji.IsSvs)
+            {
+                sb.Add(kanji.NonNullVariationSelector);
+            }
+
+            if (option == RemoveIvsOption.RemoveAll)
+            {
+                continue;
+            }
+            if(Library.IvsToSvsDic.TryGetValue(kanji, out var svs))
+            {
+                sb.Add(svs);
+            }
         }
-        return new string(result.Slice(0, length));
-#endif
+        return sb.ToString();
     }
 
     /// <summary>
@@ -282,20 +312,51 @@ public static class ItaijiUtility
     /// <returns>Moji_Johoとして無効な異体字を含む場合はtrueを返します。</returns>
     public static bool HasInvalidVariationSelectorAsMojiJoho(string str) => HasInvalidVariationSelector(str, IvsCollectionType.MojiJoho);
 
+    private static Func<CIInfo, Rune> GetFunc(CIConvertOption option)
+    {
+        return option switch
+        {
+            CIConvertOption.ToSvs => (CIInfo ci) => ci.SvsRune,
+            CIConvertOption.ToAdobeJapan1 => (CIInfo ci) => ci.AdobeJapan1IvsRune,
+            CIConvertOption.ToMojiJoho => (CIInfo ci) => ci.MojiJohoIvsRune,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
 
-}
+    /// <summary>
+    /// CJK互換漢字を,SVSを使用した表現に変換します。
+    /// </summary>
+    /// <param name="str"></param>
+    /// <returns></returns>
+    public static string ConvertCompatibilityIdeographs(string str)
+    {
+       return ItaijiUtility.ConvertCompatibilityIdeographs(str, CIConvertOption.ToSvs);
+    }
 
-/// <summary>
-/// IVSの比較方法を指定します。
-/// </summary>
-public enum IvsComparison
-{
     /// <summary>
-    /// 異体字セレクタまで含めて一致を調べます。
+    /// CJK互換漢字を,SVSまたはIVSを使用した表現に変換します。
     /// </summary>
-    ExactMatch,
-    /// <summary>
-    /// ベースのRuneが同じであれば、異体字セレクタの有無にかかわらず、同一視します。
-    /// </summary>
-    IgnoreIvs,
+    /// <param name="str"></param>
+    /// <param name="option"></param>
+    /// <returns></returns>
+    public static string ConvertCompatibilityIdeographs(string str, CIConvertOption option)
+    {
+        //最大str.Length*3のバッファが必要なのだが、そこまで確保すると無駄が多そう・・・
+        var runeFunc = GetFunc(option);
+        using var sb = new RuneStringBuilder(str.Length * 2);
+        foreach (var kanji in str.EnumerateKanji())
+        {
+            if (Library.CIDictionary.TryGetValue(kanji, out var ciInfo))
+            {
+                sb.Add(ciInfo.BaseRune);
+                sb.Add(runeFunc(ciInfo));
+            }
+            else
+            {
+                sb.Add(kanji);
+            }
+        }
+        return sb.ToString();
+    }
+
 }

@@ -26,4 +26,33 @@ public partial class ItaijiTest
 
         CollectionAssert.AreEqual(data.ExpectedKanjiChars(),list);
     }
+
+    [TestMethod]
+    [DynamicData(nameof(RemoveIvsTestDataSamples))]
+    public void RemoveIvsSpanTest(RemoveIvsTestData data)
+    {
+        var source = data.Source();
+        Assert.AreEqual(data.ExpectedRemoveAll(), ItaijiUtility.RemoveVariationSelector(source.AsSpan()));
+        Assert.AreEqual(data.ExpectedRemoveOnlyIvs(), ItaijiUtility.RemoveIvs(source.AsSpan(), RemoveIvsOption.RemoveAll));
+        Assert.AreEqual(data.ExpectedRemoveOnlyIvsToSvs(), ItaijiUtility.RemoveIvs(source.AsSpan(), RemoveIvsOption.RemoveToSvs));
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(CIConvertTestDataSamples))]
+    public void CIConvertSpanTest(CIConvertTestData data)
+    {
+        var baseStr = data.CIRune().AsSpan();
+        Assert.AreEqual(
+            data.SvsRune(),
+            ItaijiUtility.ConvertCompatibilityIdeographs(baseStr, CIConvertOption.ToSvs)
+            );
+        Assert.AreEqual(
+            data.AdobeJapan1IvsRune(),
+            ItaijiUtility.ConvertCompatibilityIdeographs(baseStr, CIConvertOption.ToAdobeJapan1)
+            );
+        Assert.AreEqual(
+            data.MojiJohoIvsRune(),
+            ItaijiUtility.ConvertCompatibilityIdeographs(baseStr, CIConvertOption.ToMojiJoho)
+            );
+    }
 }
