@@ -1,4 +1,4 @@
-﻿using Kanji.Generator;
+﻿using Itaiji.Generator;
 using System;
 using System.Collections.Generic;
 using System.Text;

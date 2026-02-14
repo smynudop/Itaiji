@@ -28,6 +28,21 @@ public enum IvsCollectionType : int
     /// </summary>
     CJKCompatibilityIdeographs = 1<< 3,
 
+
+    /// <summary>
+    /// CAAPH(中国の文化艺术出版社)の異体字です。
+    /// </summary>
+    CAAPH = 1<<4,
+    /// <summary>
+    /// KRName(韓国)の異体字です。
+    /// </summary>
+    KRName = 1<<5,
+    /// <summary>
+    /// MSARG(マカオ特別行政区)の異体字です。
+    /// </summary>
+    MSARG = 1<<6,
+
+
     /// <summary>
     /// このライブラリでは未知の異体字です。
     /// </summary>

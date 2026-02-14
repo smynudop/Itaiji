@@ -1,18 +1,18 @@
-﻿using Kanji.Generator;
+﻿using Itaiji.Generator;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Itaiji;
 
 namespace Itaiji.Generator;
 
 internal static class IvdSequences
 {
-    private static Dictionary<string, int> dict1() => new Dictionary<string, int>(1) { { "1", 1 } };
     public static void Execute()
     {
         var text = File.ReadAllText("IVD_Sequences.txt");
 
-        var dic = new Dictionary<(Rune, Rune), IvsType>();
+        var dic = new Dictionary<(Rune, Rune), IvsCollectionType>();
         foreach (var line in text.Split(["\n"], StringSplitOptions.None))
         {
             if (line.StartsWith("#"))
@@ -35,12 +35,16 @@ internal static class IvdSequences
 
             var type = cols[1].Trim() switch
             {
-                "Adobe-Japan1" => IvsType.AdobeJapan,
-                "Hanyo-Denshi" => IvsType.HanyoDenshi,
-                "Moji_Joho" => IvsType.MojiJoho,
-                _ => IvsType.Other
+                "Adobe-Japan1" => IvsCollectionType.AdobeJapan,
+                "Hanyo-Denshi" => IvsCollectionType.HanyoDenshi,
+                "Moji_Joho" => IvsCollectionType.MojiJoho,
+                "CAAPH" => IvsCollectionType.CAAPH,
+                "KRName" => IvsCollectionType.KRName,
+                "MSARG" => IvsCollectionType.MSARG,
+
+                _ => IvsCollectionType.Unknown
             };
-            if (type == IvsType.Other)
+            if (type == IvsCollectionType.Unknown)
             {
                 //Console.WriteLine(cols[1]);
                 continue;
@@ -48,7 +52,7 @@ internal static class IvdSequences
 
             if (dic.ContainsKey(t) == false)
             {
-                dic[t] = IvsType.None;
+                dic[t] = IvsCollectionType.None;
             }
             dic[t] |= type;
         }
@@ -76,7 +80,7 @@ internal static class IvdSequences
         var cnt = 0;
         foreach (var kvp in dic.OrderBy(x => x.Key.Item1).ThenBy(x => x.Key.Item2))
         {
-            if(cnt % 10 == 0)
+            if (cnt % 10 == 0)
             {
                 builder.Append("        ");
             }

@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Itaiji\Itaiji.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="IVD_Sequences.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
