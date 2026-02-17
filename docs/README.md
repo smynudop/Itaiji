@@ -67,6 +67,10 @@ dotnet test
 dotnet test src\Itaiji.Test\Itaiji.Test.csproj
 ```
 
+### 既知の注意点
+
+- `Memory_JpIvsList` は実行環境によって `GC.GetAllocatedBytesForCurrentThread` が0となり、アサーションが失敗する場合があります。
+
 ## パッケージング
 
 詳細は[リリース手順](release.md)を参照してください。
@@ -81,6 +85,16 @@ dotnet test src\Itaiji.Test\Itaiji.Test.csproj
 - 日本語でドキュメントを記述
 - 高パフォーマンスのため`Span<T>`/`Memory<T>`を積極的に使用
 - .NET Frameworkでは`Span<T>`が使えないため、条件付きコンパイルで切り替え
+
+## 検索アルゴリズム
+
+ItaijiUtility の検索APIは、漢字列（KanjiChar列）として扱った上でKMP法を用います。
+
+- FindIndex: KMPの prefix table を用いて最初の一致を検出し、UTF-16の開始indexとlengthを返します。
+- FindLastIndex: KMPで全一致を走査し、最後に見つかった開始indexとlengthのみを記録します。
+- Replace: KMPで全一致を走査し、見つかった範囲を順次置換します。置換は左から右の非重複置換です。
+
+IVS比較は IvsComparison に従い、IgnoreIvs は BaseRune の一致、ExactMatch は KanjiChar の一致で判定します。
 
 ## IVS (Ideographic Variation Sequence)
 

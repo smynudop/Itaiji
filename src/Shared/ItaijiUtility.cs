@@ -42,6 +42,98 @@ public static partial class ItaijiUtility
         };
     }
 
+    private static int[] CreatePrefixTable(KanjiChar[] keywordKanjis)
+    {
+        var prefixTable = new int[keywordKanjis.Length];
+        var length = 0;
+        prefixTable[0] = 0;
+        for (int i = 1; i < keywordKanjis.Length;)
+        {
+            if (keywordKanjis[i].BaseRune == keywordKanjis[length].BaseRune)
+            {
+                length++;
+                prefixTable[i] = length;
+                i++;
+            }
+            else if (length != 0)
+            {
+                length = prefixTable[length - 1];
+            }
+            else
+            {
+                prefixTable[i] = 0;
+                i++;
+            }
+        }
+        return prefixTable;
+    }
+
+    private static int[] BuildUtf16Offsets(KanjiChar[] kanjis)
+    {
+        var offsets = new int[kanjis.Length + 1];
+        for (int i = 0; i < kanjis.Length; i++)
+        {
+            offsets[i + 1] = offsets[i] + kanjis[i].Utf16SequenceLength;
+        }
+        return offsets;
+    }
+
+    private static bool TryFindIndexCore(KanjiChar[] sourceKanjis, KanjiChar[] keywordKanjis, Func<KanjiChar, KanjiChar, bool> equalsFunc, bool findLast, out int index, out int length)
+    {
+        var prefixTable = CreatePrefixTable(keywordKanjis);
+        var utf16Offsets = BuildUtf16Offsets(sourceKanjis);
+
+        var lastIndex = -1;
+        var lastLength = 0;
+        int i = 0;
+        int j = 0;
+
+        while (i < sourceKanjis.Length)
+        {
+            if (equalsFunc(sourceKanjis[i], keywordKanjis[j]))
+            {
+                i++;
+                j++;
+                if (j == keywordKanjis.Length)
+                {
+                    var matchStart = i - j;
+                    var matchIndex = utf16Offsets[matchStart];
+                    var matchLength = utf16Offsets[matchStart + j] - matchIndex;
+
+                    if (!findLast)
+                    {
+                        index = matchIndex;
+                        length = matchLength;
+                        return true;
+                    }
+
+                    lastIndex = matchIndex;
+                    lastLength = matchLength;
+                    j = prefixTable[j - 1];
+                }
+            }
+            else if (j != 0)
+            {
+                j = prefixTable[j - 1];
+            }
+            else
+            {
+                i++;
+            }
+        }
+
+        if (findLast && lastIndex >= 0)
+        {
+            index = lastIndex;
+            length = lastLength;
+            return true;
+        }
+
+        index = -1;
+        length = 0;
+        return false;
+    }
+
     /// <summary>
     /// 異体字を考慮して文字列が等しいか調べます。
     /// </summary>
@@ -127,6 +219,19 @@ public static partial class ItaijiUtility
         TryFindIndex(str, keyword, comparison, out var index, out var length);
         return (index, length);
     }
+
+    /// <summary>
+    /// 異体字を考慮して文字列の中にキーワードが含まれているか調べ、最後に見つかった開始indexとchar換算でのlengthを返します。
+    /// </summary>
+    /// <param name="str">検索対象の文字列</param>
+    /// <param name="keyword">検索する部分文字列</param>
+    /// <param name="comparison">異体字の比較方法を指定する列挙値</param>
+    /// <returns>見つかった場合は開始indexとchar単位のlengthを返します。見つからなければ(-1,0)を返します。</returns>
+    public static (int index, int length) FindLastIndex(string str, string keyword, IvsComparison comparison)
+    {
+        TryFindLastIndex(str, keyword, comparison, out var index, out var length);
+        return (index, length);
+    }
 #endif
 
     /// <summary>
@@ -141,67 +246,85 @@ public static partial class ItaijiUtility
     public static bool TryFindIndex(string str, string keyword, IvsComparison comparison, out int index, out int length)
     {
         Func<KanjiChar, KanjiChar, bool> equalsFunc = GetEqualsFunc(comparison);
-
-        // KMP法の準備
         var keywordKanjis = keyword.EnumerateKanji().ToArray();
-        var kanjiEnumerator = str.EnumerateKanji();
+        var sourceKanjis = str.EnumerateKanji().ToArray();
+        return TryFindIndexCore(sourceKanjis, keywordKanjis, equalsFunc, false, out index, out length);
+    }
 
-        var matchTable = new int[keywordKanjis.Length];
-        matchTable[0] = -1;
-        var j = -1;
-        for (int i = 0; i < keywordKanjis.Length - 1; i++)
+    /// <summary>
+    /// 異体字を考慮して文字列の中にキーワードが含まれているか調べます。
+    /// </summary>
+    /// <param name="str">検索対象の文字列</param>
+    /// <param name="keyword">検索する部分文字列</param>
+    /// <param name="comparison">異体字の比較方法を指定する列挙値</param>
+    /// <param name="index">見つかった場合に開始indexが格納されます（見つからない場合は-1）</param>
+    /// <param name="length">見つかった場合にchar単位のlengthが格納されます（見つからない場合は0）</param>
+    /// <returns>部分文字列が存在する場合はtrue、存在しない場合はfalseを返します。</returns>
+    public static bool TryFindLastIndex(string str, string keyword, IvsComparison comparison, out int index, out int length)
+    {
+        Func<KanjiChar, KanjiChar, bool> equalsFunc = GetEqualsFunc(comparison);
+        var keywordKanjis = keyword.EnumerateKanji().ToArray();
+        var sourceKanjis = str.EnumerateKanji().ToArray();
+        return TryFindIndexCore(sourceKanjis, keywordKanjis, equalsFunc, true, out index, out length);
+    }
+
+    /// <summary>
+    /// 異体字を考慮して、文字列中の指定した部分文字列を置換します。
+    /// </summary>
+    /// <param name="str">検索対象の文字列</param>
+    /// <param name="keyword">置換対象の部分文字列</param>
+    /// <param name="replacement">置換後の文字列</param>
+    /// <param name="comparison">異体字の比較方法を指定する列挙値</param>
+    /// <returns>置換後の文字列を返します。</returns>
+    public static string Replace(string str, string keyword, string replacement, IvsComparison comparison)
+    {
+        Func<KanjiChar, KanjiChar, bool> equalsFunc = GetEqualsFunc(comparison);
+        var keywordKanjis = keyword.EnumerateKanji().ToArray();
+        var sourceKanjis = str.EnumerateKanji().ToArray();
+        var prefixTable = CreatePrefixTable(keywordKanjis);
+        var utf16Offsets = BuildUtf16Offsets(sourceKanjis);
+
+        StringBuilder? sb = null;
+        int lastCopyIndex = 0;
+        int i = 0;
+        int j = 0;
+
+        while (i < sourceKanjis.Length)
         {
-            while (j >= 0 && keywordKanjis[i].BaseRune != keywordKanjis[j].BaseRune)
+            if (equalsFunc(sourceKanjis[i], keywordKanjis[j]))
             {
-                j = matchTable[j];
-            }
-            matchTable[i + 1] = j + 1;
-            j++;
-        }
-
-        var cursor = 0;
-        index = 0;
-        var matchQueue = new Queue<KanjiChar>(keywordKanjis.Length);
-
-        var hasNext = kanjiEnumerator.MoveNext();
-        while (hasNext)
-        {
-            if (equalsFunc(kanjiEnumerator.Current, keywordKanjis[cursor]))
-            {
-                matchQueue.Enqueue(kanjiEnumerator.Current);
-                cursor++;
-                hasNext = kanjiEnumerator.MoveNext();
-                if (cursor >= keywordKanjis.Length)
+                i++;
+                j++;
+                if (j == keywordKanjis.Length)
                 {
-                    length = 0;
-                    foreach (var k in matchQueue)
-                    {
-                        length += k.Utf16SequenceLength;
-                    }
-                    return true;
+                    var matchStart = i - j;
+                    var matchIndex = utf16Offsets[matchStart];
+                    var matchLength = utf16Offsets[matchStart + j] - matchIndex;
+
+                    sb ??= new StringBuilder(str.Length);
+                    sb.Append(str, lastCopyIndex, matchIndex - lastCopyIndex);
+                    sb.Append(replacement);
+                    lastCopyIndex = matchIndex + matchLength;
+                    j = 0;
                 }
+            }
+            else if (j != 0)
+            {
+                j = prefixTable[j - 1];
             }
             else
             {
-                if (cursor > 0)
-                {
-                    for (var i = 0; i < cursor - matchTable[cursor]; i++)
-                    {
-                        var k = matchQueue.Dequeue();
-                        index += k.Utf16SequenceLength;
-                    }
-                    cursor = matchTable[cursor];
-                }
-                else
-                {
-                    index += kanjiEnumerator.Current.Utf16SequenceLength;
-                    hasNext = kanjiEnumerator.MoveNext();
-                }
+                i++;
             }
         }
-        index = -1;
-        length = 0;
-        return false;
+
+        if (sb is null)
+        {
+            return str;
+        }
+
+        sb.Append(str, lastCopyIndex, str.Length - lastCopyIndex);
+        return sb.ToString();
     }
 
 

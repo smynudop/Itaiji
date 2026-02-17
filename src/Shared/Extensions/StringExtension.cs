@@ -90,6 +90,34 @@ public static class StringExtension
     /// <returns>見つかった場合は開始indexとchar単位のlengthを返します。見つからなければ(-1,0)を返します。</returns>
     public static (int index, int length) FindIndexRespectIvs(this string source, string target)
             => ItaijiUtility.FindIndex(source, target, IvsComparison.ExactMatch);
+
+    /// <summary>
+    /// 異体字を考慮して、文字列が指定した部分文字列を含むか調べ、最後に見つかった開始indexとchar換算でのlengthを返します。
+    /// </summary>
+    /// <param name="source">検索対象の文字列</param>
+    /// <param name="target">検索する部分文字列</param>
+    /// <param name="comparison">異体字の比較方法を指定する列挙値</param>
+    /// <returns>見つかった場合は開始indexとchar単位のlengthを返します。見つからなければ(-1,0)を返します。</returns>
+    public static (int index, int length) FindLastIndexWithIvs(this string source, string target, IvsComparison comparison)
+            => ItaijiUtility.FindLastIndex(source, target, comparison);
+
+    /// <summary>
+    /// 異体字をの違いを無視して、文字列が指定した部分文字列を含むか調べ、最後に見つかった開始indexとchar換算でのlengthを返します。
+    /// </summary>
+    /// <param name="source">検索対象の文字列</param>
+    /// <param name="target">検索する部分文字列</param>
+    /// <returns>見つかった場合は開始indexとchar単位のlengthを返します。見つからなければ(-1,0)を返します。</returns>
+    public static (int index, int length) FindLastIndexIgnoreIvs(this string source, string target)
+            => ItaijiUtility.FindLastIndex(source, target, IvsComparison.IgnoreIvs);
+
+    /// <summary>
+    /// 異体字をの違いを考慮して、文字列が指定した部分文字列を含むか調べ、最後に見つかった開始indexとchar換算でのlengthを返します。
+    /// </summary>
+    /// <param name="source">検索対象の文字列</param>
+    /// <param name="target">検索する部分文字列</param>
+    /// <returns>見つかった場合は開始indexとchar単位のlengthを返します。見つからなければ(-1,0)を返します。</returns>
+    public static (int index, int length) FindLastIndexRespectIvs(this string source, string target)
+            => ItaijiUtility.FindLastIndex(source, target, IvsComparison.ExactMatch);
 #endif
 
     /// <summary>
@@ -128,6 +156,70 @@ public static class StringExtension
     public static bool TryFindIndexRespectIvs(this string source, string target, out int index, out int length)
             => ItaijiUtility.TryFindIndex(source, target, IvsComparison.ExactMatch, out index, out length);
 
+    /// <summary>
+    /// 異体字を考慮して、文字列が指定した部分文字列を含むか調べます。
+    /// </summary>
+    /// <param name="source">検索対象の文字列</param>
+    /// <param name="target">検索する部分文字列</param>
+    /// <param name="comparison">異体字の比較方法を指定する列挙値</param>
+    /// <param name="index">見つかった場合に開始indexが格納されます（見つからない場合は-1）</param>
+    /// <param name="length">見つかった場合にchar単位のlengthが格納されます（見つからない場合は0）</param>
+    /// <returns>部分文字列が存在する場合はtrue、存在しない場合はfalseを返します。</returns>
+    public static bool TryFindLastIndexWithIvs(this string source, string target, IvsComparison comparison, out int index, out int length)
+            => ItaijiUtility.TryFindLastIndex(source, target, comparison, out index, out length);
+
+    /// <summary>
+    /// 異体字をの違いを無視して、文字列が指定した部分文字列を含むか調べます。
+    /// </summary>
+    /// <param name="source">検索対象の文字列</param>
+    /// <param name="target">検索する部分文字列</param>
+    /// <param name="index">見つかった場合に開始indexが格納されます（見つからない場合は-1）</param>
+    /// <param name="length">見つかった場合にchar単位のlengthが格納されます（見つからない場合は0）</param>
+    /// <returns>部分文字列が存在する場合はtrue、存在しない場合はfalseを返します。</returns>
+    public static bool TryFindLastIndexIgnoreIvs(this string source, string target, out int index, out int length)
+            => ItaijiUtility.TryFindLastIndex(source, target, IvsComparison.IgnoreIvs, out index, out length);
+
+    /// <summary>
+    /// 異体字をの違いを考慮して、文字列が指定した部分文字列を含むか調べます。
+    /// </summary>
+    /// <param name="source">検索対象の文字列</param>
+    /// <param name="target">検索する部分文字列</param>
+    /// <param name="index">見つかった場合に開始indexが格納されます（見つからない場合は-1）</param>
+    /// <param name="length">見つかった場合にchar単位のlengthが格納されます（見つからない場合は0）</param>
+    /// <returns>部分文字列が存在する場合はtrue、存在しない場合はfalseを返します。</returns>
+    public static bool TryFindLastIndexRespectIvs(this string source, string target, out int index, out int length)
+            => ItaijiUtility.TryFindLastIndex(source, target, IvsComparison.ExactMatch, out index, out length);
+
+    /// <summary>
+    /// 異体字を考慮して、文字列中の指定した部分文字列を置換します。
+    /// </summary>
+    /// <param name="source">検索対象の文字列</param>
+    /// <param name="target">置換対象の部分文字列</param>
+    /// <param name="replacement">置換後の文字列</param>
+    /// <param name="comparison">異体字の比較方法を指定する列挙値</param>
+    /// <returns>置換後の文字列を返します。</returns>
+    public static string ReplaceWithIvs(this string source, string target, string replacement, IvsComparison comparison)
+            => ItaijiUtility.Replace(source, target, replacement, comparison);
+
+    /// <summary>
+    /// 異体字の違いを無視して、文字列中の指定した部分文字列を置換します。
+    /// </summary>
+    /// <param name="source">検索対象の文字列</param>
+    /// <param name="target">置換対象の部分文字列</param>
+    /// <param name="replacement">置換後の文字列</param>
+    /// <returns>置換後の文字列を返します。</returns>
+    public static string ReplaceIgnoreIvs(this string source, string target, string replacement)
+            => ItaijiUtility.Replace(source, target, replacement, IvsComparison.IgnoreIvs);
+
+    /// <summary>
+    /// 異体字の違いを考慮して、文字列中の指定した部分文字列を置換します。
+    /// </summary>
+    /// <param name="source">検索対象の文字列</param>
+    /// <param name="target">置換対象の部分文字列</param>
+    /// <param name="replacement">置換後の文字列</param>
+    /// <returns>置換後の文字列を返します。</returns>
+    public static string ReplaceRespectIvs(this string source, string target, string replacement)
+            => ItaijiUtility.Replace(source, target, replacement, IvsComparison.ExactMatch);
 
     /// <summary>
     /// 文字列から異体字セレクタを除去します。

@@ -1,59 +1,64 @@
-# Itaiji
+﻿# Itaiji
 
-Itaiji �� .NET �����ّ̈̎��������C�u�����ł��B
-��ȋ@�\�Ƃ��āA�ّ̎��̐��K���A�ّ̎��̌����A�ّ̎��̕ϊ��Ȃǂ�񋟂��܂��B
+repository: smynudop/Itaiji
 
-## �{���C�u�����̑ΏۂƂ��鎚
-�{���C�u�����͎�ɓ��{�Ŏg�p�����ّ̎�(Adobe-Japan1/Hanyo-Denshi/Moji_Joho)��ΏۂƂ��Ă��܂��B
-����ȊO��IVS��p����ّ̎��ɂ��ẮA�������Ƃ͂ł��܂����A�R���N�V�����̔���͂ł��܂���B
+Itaiji は .NET 向けの異体字処理ライブラリです。
+主な機能として、異体字の正規化、異体字の検索、異体字の変換などを提供します。
 
-�܂��AStandardized Variants(SVS)�ɂ��Ă͌���T�|�[�g���Ă��܂���B
+## 本ライブラリの対象とする字
+本ライブラリは主に日本で使用される異体字(Adobe-Japan1/Hanyo-Denshi/Moji_Joho)を対象としています。
+日本で使用する漢字についてはSVS(Standardized Variation Sequence)も扱うことができます。
 
-# �p�b�P�[�W�\��
-- Itaiji: .NET 5.0+ �����̃��C�u����
-- Itaiji.NetFramework: .NET Framework 3.5+ �����̃��C�u����
+# パッケージ構成
+- Itaiji: .NET 5.0+ 向けのライブラリ
+- Itaiji.NetFramework: .NET Framework 3.5+ 向けのライブラリ
 
-1�p�b�P�[�W�ɂ����ɕ����Ă��闝�R�́A�{���C�u�������ˑ�����System.Text.Rune �� .NET Framework �ɂ͑��݂����A
-�A�b�v�O���[�h���̃��C�u�����̌݊������Ȃ����߂ł��B
-(System.Text.Rune ��Ǝ���������Ή\�ł����A���s�V����邢���ߔ����Ă��܂�)
-.NET Framework �����ɂ�Rune���o�b�N�|�[�g���Ċ܂߂Ă��܂��B
+1パッケージにせずに分けている理由は、本ライブラリが依存するSystem.Text.Rune が .NET Framework には存在せず、
+アップグレード時のライブラリの互換性がないためです。
+(System.Text.Rune を独自実装すれば可能ですが、お行儀がわるいため避けています)
+.NET Framework 向けにはRuneをバックポートして含めています。
 
-�܂��A�ˑ����Ȃ������߂ɁA.NET Framework �����ɂ͈ꕔ�̋@�\(Span���g�p����@�\�Ȃ�)���팸���Ă��܂��B
+また、依存をなくすために、.NET Framework 向けには一部の機能(Spanを使用する機能など)を削減しています。
 
 
 
-# �t�H���_�\��
-- `src/`: ���C�u�����̃\�[�X�R�[�h
-	- src/Itaiji/: Itaiji ���C�u�����̎�v�R�[�h
-	- src/Itaiji.Test/: ���j�b�g�e�X�g�R�[�h
-	- src/Itaiji.NetFramework/: .NET Framework �����̃v���W�F�N�g
-	- src/Itaiji.NetFramework.Test/: .NET Standard �����̃��j�b�g�e�X�g�R�[�h
-	- src/Shared/: ���ʃR�[�h
-	- src/Shared.Test/: �e�X�g�R�[�h�̋��ʃR�[�h
+# フォルダ構成
+- `src/`: ライブラリのソースコード
+	- src/Itaiji/: Itaiji ライブラリの主要コード
+	- src/Itaiji.Test/: ユニットテストコード
+	- src/Itaiji.NetFramework/: .NET Framework 向けのプロジェクト
+	- src/Itaiji.NetFramework.Test/: .NET Standard 向けのユニットテストコード
+	- src/Shared/: 共通コード
+	- src/Shared.Test/: テストコードの共通コード
 
 ---
 
-# �R�[�f�B���O�K��
-- XML�R�����g�E�h�L�������g���d�����܂��B���{��ŋL�ڂ��܂��B
-- C# 14���g�p���܂��B�V�����@�\��ϋɓI�Ɏg�p���܂��B
-- Nullable Reference Types ��L���ɂ��܂��B
-- ���C�u�����ł��邽�߁A�ȃA���P�[�V�������d�����܂��B
-	-�@`Span<T>` �� `Memory<T>` ��ϋɓI�Ɏg�p���܂�
-	- .NET Framework�ł� `Span<T>` ���g�p�ł��Ȃ����߁A��փR�[�h���g�p���܂��B#if �f�B���N�e�B�u���g�p���Đ؂�ւ��܂��B	 
-	- ���T�C�Y�E�Z�����̃o�b�t�@�m�ۂɂ� `stackalloc` ���g�p���܂��B.NET Framework�����ɂ�`ArrayPool<T>` ���g�p���܂��B	
-	- �\���̂�readonly�ɂ��A�\�Ȍ���Box���A�h�q�I�R�s�[������܂��B
-	- Linq�͎g�p���܂���Bforeach�͎g�p���Ă��\���܂���B
+# コーディング規約
+- XMLコメント・ドキュメントを重視します。日本語で記載します。
+- C# 14を使用します。新しい機能を積極的に使用します。
+- Nullable Reference Types を有効にします。
+- ライブラリであるため、省アロケーションを重視します。
+	- `Span<T>` や `Memory<T>` を積極的に使用します
+	- .NET Frameworkでは `Span<T>` を使用できないため、代替コードを使用します。#if ディレクティブを使用して切り替えます。	 
+	- 小サイズ・短寿命のバッファ確保には `stackalloc` を使用します。.NET Framework向けには`ArrayPool<T>` を使用します。	
+	- 構造体はreadonlyにし、可能な限りBox化、防衛的コピーを避けます。
+	- Linqは使用しません。foreachは使用しても構いません。
 
-## �����K��
-- C# �̈�ʓI�Ȗ����K���ɏ]���܂��B
-- Ideographic Variation Sequence ��Ivs�Əȗ����܂��B
-	- �ّ̎��Z���N�^�S�ʂ������ꍇ��VariationSelector(Vs)�Ƃ��܂����A�{���C�u�����ł͌���IVS�݂̂��������߁AIvs�Ƃ��܂��B
-- �u�ّ̎��Z���N�^���l������v���\�b�h�͈ȉ��̂悤�ɖ������܂��B
-	- IvsComparison�����[�U�[���w��ł���ꍇ -> ���\�b�h���̖�����WithIvs��t�^
-	- Ivs�̈Ⴂ���l������ꍇ -> ���\�b�h���̖�����RespectIvs��t�^
-	- Ivs�̈Ⴂ�𖳎�����ꍇ -> ���\�b�h���̖�����IgnoreIvs��t�^
+## API実装方針
+- 機能はItaijiUtilityクラスに静的メソッドとして実装します。
+- StringExtensionsクラスに、string型の拡張メソッドを実装します。
+
+## 命名規則
+- C# の一般的な命名規則に従います。
+- Ideographic Variation Sequence はIvsと省略します。
+- Standardized Variation Sequence はSvsと省略します。
+- 異体字セレクタ全般を扱う場合はVariationSelector(Vs)とします。
+- 「異体字セレクタを考慮する」メソッドは以下のように命名します。
+	- IvsComparisonをユーザーが指定できる場合 -> メソッド名の末尾にWithIvsを付与
+	- Ivsの違いを考慮する場合 -> メソッド名の末尾にRespectIvsを付与
+	- Ivsの違いを無視する場合 -> メソッド名の末尾にIgnoreIvsを付与
 
 
-# KanjiChar �\���̂̐݌v���j
-- �����o�Ƃ���Rune2�������܂��B1�ڂ���{���A2�ڂ�IVS�ł��B
-- IVS�������Ȃ��ꍇ�A�����I�ɂ�2�ڂ�Rune��U+0000�Ƃ��܂��Bpublic�ɂ�nullable�Œ񋟂��܂��B
+# KanjiChar 構造体の設計方針
+- メンバとしてRune2つを持ちます。1つ目が基本字、2つ目がIVS/SVSです。
+- IVSを持たない場合、内部的には2つ目のRuneはU+0000とします。publicにはnullableで提供します。

@@ -216,7 +216,9 @@ public sealed partial class ItaijiTest
     {
         public Func<string> Source { get; set; }
         public Func<string> Target { get; set; }
-        public Func<(int, int)> ExpectedIndexAndLength { get; set; }
+        public Func<(int, int)> ExpectedIndexAndLengthIgnore { get; set; }
+
+        public Func<(int, int)> ExpectedIndexAndLengthExactly { get; set; }
         public bool ExpectContainsExactly { get; set; }
         public bool ExpectContainsIgnoreIvs { get; set; }
     }
@@ -229,7 +231,8 @@ public sealed partial class ItaijiTest
             {
                 Source = () => new string (['私', 'は', '山', '本', '博', 'で', 'す']),
                 Target = () => new string (['山', '本', '博']),
-                ExpectedIndexAndLength = () => (2, 3),
+                ExpectedIndexAndLengthIgnore = () => (2, 3),
+                ExpectedIndexAndLengthExactly = () => (2, 3),
                 ExpectContainsExactly = true,
                 ExpectContainsIgnoreIvs = true
             }
@@ -240,7 +243,8 @@ public sealed partial class ItaijiTest
             {
                 Source = () => new string (['私', 'は', '山', '本', '博', VS17High, VS17Low, 'で', 'す']),
                 Target = () => new string (['山', '本', '博']),
-                ExpectedIndexAndLength =  () => (2, 5),
+                ExpectedIndexAndLengthIgnore = () => (2, 5),
+                ExpectedIndexAndLengthExactly = () => (-1, 0),
                 ExpectContainsExactly = false,
                 ExpectContainsIgnoreIvs = true
             }
@@ -251,7 +255,8 @@ public sealed partial class ItaijiTest
             {
                 Source = () => new string (['私', 'は', '山', '本', '博', 'で', 'す']),
                 Target = () => new string (['山', '本', '博', VS17High, VS17Low]),
-                ExpectedIndexAndLength =  () => (2, 3),
+                ExpectedIndexAndLengthIgnore = () => (2, 3),
+                ExpectedIndexAndLengthExactly = () => (-1, 0),
                 ExpectContainsExactly = false,
                 ExpectContainsIgnoreIvs = true
             }
@@ -262,7 +267,8 @@ public sealed partial class ItaijiTest
             {
                 Source = () => new string (['私', VS17High, VS17Low, 'は', '山', '本', '博', 'で', 'す']),
                 Target = () => new string (['山', '本', '博']),
-                ExpectedIndexAndLength =  () => (4, 3),
+                ExpectedIndexAndLengthIgnore = () => (4, 3),
+                ExpectedIndexAndLengthExactly = () => (4, 3),
                 ExpectContainsExactly = true,
                 ExpectContainsIgnoreIvs = true
             }
@@ -273,9 +279,88 @@ public sealed partial class ItaijiTest
             {
                 Source = () => new string (['私', 'は', '山', '本', '博', 'で', 'す']),
                 Target = () => new string (['山', '本', '専']),
-                ExpectedIndexAndLength =  () => (-1, 0),
+                ExpectedIndexAndLengthIgnore =  () => (-1, 0),
+                 ExpectedIndexAndLengthExactly = () => (-1, 0),
                 ExpectContainsExactly = false,
                 ExpectContainsIgnoreIvs = false
+            }
+        };
+    }
+
+    public class FindLastIndexTestData
+    {
+        public Func<string> Source { get; set; }
+        public Func<string> Target { get; set; }
+        public Func<(int, int)> ExpectedIgnoreIvs { get; set; }
+        public Func<(int, int)> ExpectedExactMatch { get; set; }
+    }
+
+    public static IEnumerable<object[]> FindLastIndexTestDataSamples()
+    {
+        yield return new object[]
+        {
+            new FindLastIndexTestData
+            {
+                Source = () => new string (['私', 'は', '山', '本', '博', 'で', 'す', '山', '本', '博']),
+                Target = () => new string (['山', '本', '博']),
+                ExpectedIgnoreIvs = () => (7, 3),
+                ExpectedExactMatch = () => (7, 3)
+            }
+        };
+        yield return new object[]
+        {
+            new FindLastIndexTestData
+            {
+                Source = () => new string (['私', 'は', '山', '本', '博', VS17High, VS17Low, 'で', 'す', '山', '本', '博', VS17High, VS17Low]),
+                Target = () => new string (['山', '本', '博']),
+                ExpectedIgnoreIvs = () => (9, 5),
+                ExpectedExactMatch = () => (-1, 0)
+            }
+        };
+    }
+
+    public class ReplaceTestData
+    {
+        public Func<string> Source { get; set; }
+        public Func<string> Target { get; set; }
+        public Func<string> Replacement { get; set; }
+        public Func<string> ExpectedIgnoreIvs { get; set; }
+        public Func<string> ExpectedExactMatch { get; set; }
+    }
+
+    public static IEnumerable<object[]> ReplaceTestDataSamples()
+    {
+        yield return new object[]
+        {
+            new ReplaceTestData
+            {
+                Source = () => new string (['山', '本', '博', 'で', 'す', '山', '本', '博']),
+                Target = () => new string (['山', '本', '博']),
+                Replacement = () => new string (['神']),
+                ExpectedIgnoreIvs = () => new string (['神', 'で', 'す', '神']),
+                ExpectedExactMatch = () => new string (['神', 'で', 'す', '神'])
+            }
+        };
+        yield return new object[]
+        {
+            new ReplaceTestData
+            {
+                Source = () => new string (['山', '本', '博', VS17High, VS17Low, 'で', 'す', '山', '本', '博']),
+                Target = () => new string (['山', '本', '博']),
+                Replacement = () => new string (['神']),
+                ExpectedIgnoreIvs = () => new string (['神', 'で', 'す', '神']),
+                ExpectedExactMatch = () => new string (['山', '本', '博', VS17High, VS17Low, 'で', 'す', '神'])
+            }
+        };
+        yield return new object[]
+        {
+            new ReplaceTestData
+            {
+                Source = () => new string (['山', '山', '山']),
+                Target = () => new string (['山', '山']),
+                Replacement = () => new string (['神']),
+                ExpectedIgnoreIvs = () => new string (['神', '山']),
+                ExpectedExactMatch = () => new string (['神', '山'])
             }
         };
     }

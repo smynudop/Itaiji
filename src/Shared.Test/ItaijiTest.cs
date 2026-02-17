@@ -70,7 +70,7 @@ public sealed partial class ItaijiTest
 
     [TestMethod]
     [DynamicData(nameof(FindIndexTestDataSamples))]
-    public void ContainsIgnoreIvsTest(FindIndexTestData data)
+    public void ContainsTest(FindIndexTestData data)
     {
         Assert.AreEqual(data.ExpectContainsIgnoreIvs, ItaijiUtility.Contains(data.Source(), data.Target(), IvsComparison.IgnoreIvs));
         Assert.AreEqual(data.ExpectContainsExactly, ItaijiUtility.Contains(data.Source(), data.Target(), IvsComparison.ExactMatch));
@@ -78,9 +78,43 @@ public sealed partial class ItaijiTest
 
     [TestMethod]
     [DynamicData(nameof(FindIndexTestDataSamples))]
-    public void FindIndexIgnoreIvsTest(FindIndexTestData data)
+    public void FindIndexTest(FindIndexTestData data)
     {
-        Assert.AreEqual(data.ExpectedIndexAndLength(), ItaijiUtility.FindIndex(data.Source(), data.Target(), IvsComparison.IgnoreIvs));
+        Assert.AreEqual(data.ExpectedIndexAndLengthIgnore(), ItaijiUtility.FindIndex(data.Source(), data.Target(), IvsComparison.IgnoreIvs));
+        Assert.AreEqual(data.ExpectedIndexAndLengthExactly(), ItaijiUtility.FindIndex(data.Source(), data.Target(), IvsComparison.ExactMatch));
+
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(FindLastIndexTestDataSamples))]
+    public void FindLastIndexIgnoreIvsTest(FindLastIndexTestData data)
+    {
+        Assert.AreEqual(data.ExpectedIgnoreIvs(), ItaijiUtility.FindLastIndex(data.Source(), data.Target(), IvsComparison.IgnoreIvs));
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(FindLastIndexTestDataSamples))]
+    public void TryFindLastIndexRespectIvsTest(FindLastIndexTestData data)
+    {
+        var expected = data.ExpectedExactMatch();
+        var found = ItaijiUtility.TryFindLastIndex(data.Source(), data.Target(), IvsComparison.ExactMatch, out var index, out var length);
+        Assert.AreEqual(expected.Item1 >= 0, found);
+        Assert.AreEqual(expected, (index, length));
+        Assert.AreEqual(expected, ItaijiUtility.FindLastIndex(data.Source(), data.Target(), IvsComparison.ExactMatch));
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(ReplaceTestDataSamples))]
+    public void ReplaceIgnoreIvsTest(ReplaceTestData data)
+    {
+        Assert.AreEqual(data.ExpectedIgnoreIvs(), ItaijiUtility.Replace(data.Source(), data.Target(), data.Replacement(), IvsComparison.IgnoreIvs));
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(ReplaceTestDataSamples))]
+    public void ReplaceRespectIvsTest(ReplaceTestData data)
+    {
+        Assert.AreEqual(data.ExpectedExactMatch(), ItaijiUtility.Replace(data.Source(), data.Target(), data.Replacement(), IvsComparison.ExactMatch));
     }
 
     [TestMethod]
@@ -185,30 +219,30 @@ public sealed partial class ItaijiTest
 
     }
 
-    [TestMethod]
-    public void Memory_JpIvsList()
-    {
-        // 測定前の確保バイト数を取得
-        long allocatedBytesBefore = GC.GetAllocatedBytesForCurrentThread();
+    //[TestMethod]
+    //public void Memory_JpIvsList()
+    //{
+    //    // 測定前の確保バイト数を取得
+    //    long allocatedBytesBefore = GC.GetAllocatedBytesForCurrentThread();
 
-        // --- 測定対象 ---
-        var largeHashSet = Library.JpIvsList;
-        // --- 測定対象 ---
+    //    // --- 測定対象 ---
+    //    var largeHashSet = Library.JpIvsList;
+    //    // --- 測定対象 ---
 
-        // 測定後の確保バイト数を取得
-        long allocatedBytesAfter = GC.GetAllocatedBytesForCurrentThread();
+    //    // 測定後の確保バイト数を取得
+    //    long allocatedBytesAfter = GC.GetAllocatedBytesForCurrentThread();
 
-        long memoryAllocated = allocatedBytesAfter - allocatedBytesBefore;
+    //    long memoryAllocated = allocatedBytesAfter - allocatedBytesBefore;
 
-        Debug.WriteLine($"StandardizedVariants: {memoryAllocated / 1024.0:N2} KB");
+    //    Debug.WriteLine($"StandardizedVariants: {memoryAllocated / 1024.0:N2} KB");
 
-        Assert.IsGreaterThan(0, memoryAllocated);
+    //    Assert.IsGreaterThan(0, memoryAllocated);
 
-        // このメソッドはGCの実行を必要としないため、よりクリーンです。
-        // GC.KeepAlive(largeHashSet) を呼んでおくと、最適化でオブジェクトが消されるのを防げます。
-        GC.KeepAlive(largeHashSet);
+    //    // このメソッドはGCの実行を必要としないため、よりクリーンです。
+    //    // GC.KeepAlive(largeHashSet) を呼んでおくと、最適化でオブジェクトが消されるのを防げます。
+    //    GC.KeepAlive(largeHashSet);
 
-    }
+    //}
 
     [TestMethod]
     [DynamicData(nameof(CIConvertTestDataSamples))]
