@@ -33,6 +33,12 @@ Itaiji は .NET 向けの異体字処理ライブラリです。
 
 ---
 
+# バージョン管理について
+* 現在は0.xであるため、破壊的変更があってもminor バージョン、軽微な修正等はpatch バージョンで更新します。
+
+## バージョンを上げる際の手順
+* `src/Itaiji/Itaiji.csproj`, `src/Itaiji.NetFramework/Itaiji.NetFramework.csproj` の両方の `<VersionPrefix>`, `<AssemblyVersion>`, `<FileVersion>` タグを更新する。
+
 
 
 

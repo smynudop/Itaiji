@@ -6,10 +6,10 @@
 	<LangVersion>14</LangVersion>
 	 
 	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
-	  <VersionPrefix>0.2.0</VersionPrefix>
-	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
-	  <AssemblyVersion>0.2.0.0</AssemblyVersion>
-	  <FileVersion>0.2.0.0</FileVersion>
+	  	  <VersionPrefix>0.3.0</VersionPrefix>
+	  	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
+	  	  <AssemblyVersion>0.3.0.0</AssemblyVersion>
+	  	  <FileVersion>0.3.0.0</FileVersion>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <Authors>udop</Authors>
 	  <PackageProjectUrl>https://github.com/smynudop/Itaiji</PackageProjectUrl>
