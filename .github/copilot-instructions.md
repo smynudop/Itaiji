@@ -33,32 +33,6 @@ Itaiji は .NET 向けの異体字処理ライブラリです。
 
 ---
 
-# コーディング規約
-- XMLコメント・ドキュメントを重視します。日本語で記載します。
-- C# 14を使用します。新しい機能を積極的に使用します。
-- Nullable Reference Types を有効にします。
-- ライブラリであるため、省アロケーションを重視します。
-	- `Span<T>` や `Memory<T>` を積極的に使用します
-	- .NET Frameworkでは `Span<T>` を使用できないため、代替コードを使用します。#if ディレクティブを使用して切り替えます。	 
-	- 小サイズ・短寿命のバッファ確保には `stackalloc` を使用します。.NET Framework向けには`ArrayPool<T>` を使用します。	
-	- 構造体はreadonlyにし、可能な限りBox化、防衛的コピーを避けます。
-	- Linqは使用しません。foreachは使用しても構いません。
-
-## API実装方針
-- 機能はItaijiUtilityクラスに静的メソッドとして実装します。
-- StringExtensionsクラスに、string型の拡張メソッドを実装します。
-
-## 命名規則
-- C# の一般的な命名規則に従います。
-- Ideographic Variation Sequence はIvsと省略します。
-- Standardized Variation Sequence はSvsと省略します。
-- 異体字セレクタ全般を扱う場合はVariationSelector(Vs)とします。
-- 「異体字セレクタを考慮する」メソッドは以下のように命名します。
-	- IvsComparisonをユーザーが指定できる場合 -> メソッド名の末尾にWithIvsを付与
-	- Ivsの違いを考慮する場合 -> メソッド名の末尾にRespectIvsを付与
-	- Ivsの違いを無視する場合 -> メソッド名の末尾にIgnoreIvsを付与
 
 
-# KanjiChar 構造体の設計方針
-- メンバとしてRune2つを持ちます。1つ目が基本字、2つ目がIVS/SVSです。
-- IVSを持たない場合、内部的には2つ目のRuneはU+0000とします。publicにはnullableで提供します。
+
