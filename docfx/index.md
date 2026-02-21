@@ -1,1 +1,1 @@
-﻿[!include[README](../README.md)]
+﻿[!INCLUDE [README](../Readme.md)]
