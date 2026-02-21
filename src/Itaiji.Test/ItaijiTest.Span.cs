@@ -37,6 +37,8 @@ public partial class ItaijiTest
         Assert.AreEqual(data.ExpectedRemoveOnlyIvsToSvs(), ItaijiUtility.RemoveIvs(source.AsSpan(), RemoveIvsOption.RemoveToSvs));
     }
 
+
+
     [TestMethod]
     [DynamicData(nameof(CIConvertTestDataSamples))]
     public void CIConvertSpanTest(CIConvertTestData data)

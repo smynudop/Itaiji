@@ -262,4 +262,12 @@ public sealed partial class ItaijiTest
             ItaijiUtility.ConvertCompatibilityIdeographs(baseStr, CIConvertOption.ToMojiJoho)
             );
     }
+
+    [TestMethod]
+    public void ToTextTest()
+    {
+        var test = new string(['山','本','博', VS17High, VS17Low]);
+        Assert.AreEqual(test, test.EnumerateKanji().ToText());
+        Assert.AreEqual("山本", test.EnumerateKanji().Where(k => k.IsVariation == false).ToText());
+    }
 }

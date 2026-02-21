@@ -10,8 +10,13 @@ internal ref struct RuneStringBuilder
     private Span<char> _buffer;
     private int pos = 0;
 
+    public RuneStringBuilder() : this(8)
+    {
+    }
+
     public RuneStringBuilder(int capacity)
     {
+        capacity = Math.Max(capacity, 8);
         _array = ArrayPool<char>.Shared.Rent(capacity);
         _buffer = _array.AsSpan(0, capacity);
     }
@@ -74,8 +79,13 @@ internal ref struct RuneStringBuilder
     private char[] _array;
     private int pos = 0;
 
+    public RuneStringBuilder() : this(8)
+    {
+    }
+
     public RuneStringBuilder(int capacity)
     {
+        capacity = Math.Max(capacity, 8);
         _array = new char[capacity];
     }
 

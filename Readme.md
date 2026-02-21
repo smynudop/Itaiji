@@ -20,4 +20,44 @@ https://www.nuget.org/packages/Itaiji.NetFramework/
 - 異体字セレクタやサロゲートペアを考慮した文字の列挙
 - .NET Framework向けにSystem.Text.Rune互換構造体を提供
 
+# 使い方
+
+
+* 異体字を除去
+```csharp
+using Itaiji.Extensions;
+
+var removed = str.RemoveVariationSelector();
+```
+
+* IVSをSVSに変換
+
+```csharp
+using Itaiji.Extensions;
+
+var removed = str.RemoveIvs(RemoveIvsOption.RemoveToSvs);
+```
+
+* 互換漢字を統合漢字+SVSに変換
+```csharp
+using Itaiji.Extensions;
+
+var converted = str.ComvertCompabilityVariationSelector();
+```	
+
+* 異体字を無視して置換
+```csharp
+using Itaiji.Extensions;
+
+var replaced = str.ReplaceWithIvs("田中", "鈴木");
+```
+
+* Moji-Johoで扱えない異体字セレクタが含まれるかの判定
+```csharp
+using Itaiji.Extensions;
+
+var illegal = str.HasInvalidVariationSelectorAsMojiJoho();
+```
+
+
 詳細は[APIドキュメント](https://smynudop.github.io/Itaiji/index.html)をご覧ください。
