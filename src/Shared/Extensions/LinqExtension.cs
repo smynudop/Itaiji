@@ -18,7 +18,7 @@ public static class LinqExtensions
         }
 
         var capacity = list is ICollection<KanjiChar> collection ? collection.Count : -1;
-        var sb = new RuneStringBuilder(capacity);
+        using var sb = new RuneStringBuilder(capacity);
         foreach (var item in list)
         {
             sb.Add(item);
