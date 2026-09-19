@@ -4,11 +4,32 @@ namespace Itaiji;
 
 internal static partial class Library
 {
+#if NET35
+    private static volatile IvdTable? _ivd;
+    private static readonly object IvdLock = new();
+
+    private static IvdTable GetIvd()
+    {
+        var table = _ivd;
+        if (table != null)
+        {
+            return table;
+        }
+
+        lock (IvdLock)
+        {
+            return _ivd ??= LoadIvd();
+        }
+    }
+#else
     private static readonly Lazy<IvdTable> Ivd = new(LoadIvd);
+
+    private static IvdTable GetIvd() => Ivd.Value;
+#endif
 
     internal static IvsCollectionType GetIvsCollectionType(int key)
     {
-        var table = Ivd.Value;
+        var table = GetIvd();
         var index = Array.BinarySearch(table.Keys, (uint)key);
         return index >= 0 ? (IvsCollectionType)table.Values[index] : IvsCollectionType.Unknown;
     }
@@ -18,7 +39,12 @@ internal static partial class Library
         using var stream = typeof(Library).Assembly.GetManifestResourceStream("Itaiji.IVD_Sequences.bin")
             ?? throw new InvalidDataException("The embedded IVD data is missing.");
         using var buffer = new MemoryStream();
-        stream.CopyTo(buffer);
+        var chunk = new byte[8192];
+        int bytesRead;
+        while ((bytesRead = stream.Read(chunk, 0, chunk.Length)) != 0)
+        {
+            buffer.Write(chunk, 0, bytesRead);
+        }
         var data = buffer.ToArray();
 
         if (data.Length < 8 || data[0] != 'I' || data[1] != 'V' || data[2] != 'D' || data[3] != '1')
@@ -44,13 +70,13 @@ internal static partial class Library
                 throw new InvalidDataException("The embedded IVD data contains an invalid Unicode value.");
             }
 
-            var key = (baseRune << 8) | selector;
-            if (i > 0 && key <= keys[i - 1])
+            var packedKey = (baseRune << 8) | selector;
+            if (i > 0 && packedKey <= keys[i - 1])
             {
                 throw new InvalidDataException("The embedded IVD data is not sorted by unique keys.");
             }
 
-            keys[i] = key;
+            keys[i] = packedKey;
             values[i] = data[offset + 4];
         }
 

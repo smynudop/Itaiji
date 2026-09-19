@@ -28,7 +28,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Include="..\Shared\**\*.cs" Exclude="..\Shared\obj\**\*.cs" />
+		<Compile Include="..\Shared\**\*.cs" Exclude="..\Shared\obj\**\*.cs;..\Shared\Library.cs" />
+		<EmbeddedResource Include="..\Itaiji.Generator\IVD_Sequences.bin" LogicalName="Itaiji.IVD_Sequences.bin" />
 		<None Include="..\docs\icon.png">
 		  <Pack>True</Pack>
 		  <PackagePath>\</PackagePath>
