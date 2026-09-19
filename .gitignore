@@ -6,7 +6,5 @@ packages/
 
 *.suo
 *.nupkg
-IVD_Sequences.txt
 docfx/_site/
 docfx/api/
-/src/Itaiji.Generator/StandardizedVariants.txt
