@@ -1,26 +1,12 @@
 ﻿# Itaiji
 
-repository: smynudop/Itaiji
+github repository: smynudop/Itaiji
 
 Itaiji は .NET 向けの異体字処理ライブラリです。
 主な機能として、異体字の正規化、異体字の検索、異体字の変換などを提供します。
 
-## 本ライブラリの対象とする字
-本ライブラリは主に日本で使用される異体字(Adobe-Japan1/Hanyo-Denshi/Moji_Joho)を対象としています。
-日本で使用する漢字についてはSVS(Standardized Variation Sequence)も扱うことができます。
-
-# パッケージ構成
-- Itaiji: .NET 5.0+ 向けのライブラリ
-- Itaiji.NetFramework: .NET Framework 3.5+ 向けのライブラリ
-
-1パッケージにせずに分けている理由は、本ライブラリが依存するSystem.Text.Rune が .NET Framework には存在せず、
-アップグレード時のライブラリの互換性がないためです。
-(System.Text.Rune を独自実装すれば可能ですが、お行儀がわるいため避けています)
-.NET Framework 向けにはRuneをバックポートして含めています。
-
-また、依存をなくすために、.NET Framework 向けには一部の機能(Spanを使用する機能など)を削減しています。
-
-
+## ライブラリ概要
+Readme.mdを参照のこと。
 
 # フォルダ構成
 - `src/`: ライブラリのソースコード
@@ -32,6 +18,11 @@ Itaiji は .NET 向けの異体字処理ライブラリです。
 	- src/Shared.Test/: テストコードの共通コード
 
 ---
+
+# コーディング規約
+* 外部ライブラリへの依存をしない。
+* ライブラリであるためパフォーマンスに配慮する。
+	* `Span<T>` 等は.net Coreターゲットのみに使用する。
 
 # バージョン管理について
 * 現在は0.xであるため、破壊的変更があってもminor バージョン、軽微な修正等はpatch バージョンで更新します。

@@ -10,9 +10,9 @@ https://www.nuget.org/packages/Itaiji.NetFramework/
 
 # 主な機能
 - 文字列から異体字セレクタの削除
-	- IVS/SVSの両方に対応
-	- IVSのうち、SVSで表されるものはSVSで表すオプションあり
-- 互換漢字を統合漢字+SVSを用いた表現に変換
+	- すべての異体字を削除
+	- IVSのうち、SVSで表されるものをSVSで表すオプションあり
+- 互換漢字を統合漢字 + SVSを用いた表現に変換
 	- Adobe-Japan1, Moji_Johoの表現への変換にも対応	
 - 異体字がどのコレクションに含まれるかの判定
 - 特定のコレクションで扱えない異体字セレクタが含まれるかの判定
@@ -42,7 +42,7 @@ var removed = str.RemoveIvs(RemoveIvsOption.RemoveToSvs);
 ```csharp
 using Itaiji.Extensions;
 
-var converted = str.ComvertCompabilityVariationSelector();
+var converted = str.ConvertCompabilityVariationSelector();
 ```	
 
 * 異体字を無視して置換

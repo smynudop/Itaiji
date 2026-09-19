@@ -251,7 +251,7 @@ public static class StringExtension
     /// </summary>
     /// <param name="source">変換する文字列</param>
     /// <returns></returns>
-    public static string ComvertCompabilityVariationSelector(this string source)
+    public static string ConvertCompabilityVariationSelector(this string source)
             => ItaijiUtility.ConvertCompatibilityIdeographs(source);
 
     /// <summary>
@@ -260,7 +260,7 @@ public static class StringExtension
     /// <param name="source">変換する文字列</param>
     /// <param name="option">変換先</param>
     /// <returns></returns>
-    public static string ComvertCompabilityVariationSelector(this string source, CIConvertOption option)
+    public static string ConvertCompabilityVariationSelector(this string source, CIConvertOption option)
             => ItaijiUtility.ConvertCompatibilityIdeographs(source, option);
 
     /// <summary>

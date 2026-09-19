@@ -46,7 +46,7 @@ public static class ItaijiMemoryExtension
     /// </summary>
     /// <param name="source">変換する文字列</param>
     /// <returns></returns>
-    public static string ComvertCompabilityVariationSelector(this ReadOnlySpan<char> source)
+    public static string ConvertCompabilityVariationSelector(this ReadOnlySpan<char> source)
             => ItaijiUtility.ConvertCompatibilityIdeographs(source);
 
     /// <summary>
@@ -55,6 +55,6 @@ public static class ItaijiMemoryExtension
     /// <param name="source">変換する文字列</param>
     /// <param name="option">変換先</param>
     /// <returns></returns>
-    public static string ComvertCompabilityVariationSelector(this ReadOnlySpan<char> source, CIConvertOption option)
+    public static string ConvertCompabilityVariationSelector(this ReadOnlySpan<char> source, CIConvertOption option)
             => ItaijiUtility.ConvertCompatibilityIdeographs(source, option);
 }
