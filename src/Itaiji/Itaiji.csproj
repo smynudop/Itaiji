@@ -13,7 +13,7 @@
 	  <PackageProjectUrl>https://github.com/smynudop/Itaiji</PackageProjectUrl>
 	  <RepositoryUrl>https://github.com/smynudop/Itaiji</RepositoryUrl>
 	  <Copyright>copyright (c) udop 2025</Copyright>
-	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageLicenseExpression>MIT AND Unicode-3.0</PackageLicenseExpression>
 	  <PackageTags>unicode,variation selectors,ivs,rune,異体字,人名</PackageTags>
 	  <Description>Itaijiは、Unicodeにおける異体字を扱うためのライブラリです。</Description>
 	  <PackageIcon>icon.png</PackageIcon>
@@ -33,6 +33,7 @@
 		  <PackagePath>\</PackagePath>
 		</None>
 		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+		<None Include="..\..\THIRD-PARTY-NOTICES.txt" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>
