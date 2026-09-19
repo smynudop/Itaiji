@@ -168,9 +168,13 @@ public struct KanjiChar : IEquatable<KanjiChar>, IComparable<KanjiChar>
         }
         else
         {
+#if NET5_0_OR_GREATER
+            return Library.GetIvsCollectionType(this.GetCode());
+#else
             return Library.JpIvsList.TryGetValue(this.GetCode(), out var type)
                 ? (IvsCollectionType)type
                 : IvsCollectionType.Unknown;
+#endif
 
         }
     }

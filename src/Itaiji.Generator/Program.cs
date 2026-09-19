@@ -4,5 +4,13 @@ using System.Text;
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 
-IvdSequences.Execute();
-StandardizedVariants.Execute();
+if (args is ["--binary-only"])
+{
+    BinaryIvdSequences.Execute();
+}
+else
+{
+    IvdSequences.Execute();
+    BinaryIvdSequences.Execute();
+    StandardizedVariants.Execute();
+}
